@@ -59,7 +59,7 @@ def make_gif(region_name):
     utc_stamp = datetime.strptime(image_hrefs[-1][-8:-4], "%H%M")
     time = utc_stamp + diff_from_utc('US/Eastern')
 
-    filename = 'gif/%s-%s.GIF' % (region_name,
+    filename = './gif/%s-%s.GIF' % (region_name,
         datetime.now().strftime('%Y%m%d-%H%M'))
     writeGif(filename, images, duration=0.1)
     return filename, time
@@ -93,6 +93,5 @@ def tweet_gif(region):
     tweet = "Radar over the %s for the past few hours. Most recent image from %s #wx #GIF" % (
         region.title(), time.strftime("%I:%M%p").lstrip("0"))
     twitter.update_status_with_media(status=tweet, media=photo)
-    os.remove(gif)
 
 tweet_gif("northeast")
