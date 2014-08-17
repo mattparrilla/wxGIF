@@ -21,7 +21,7 @@ def get_region(region_name):
     for radar images of specified region"""
 
     url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-    r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:16.0) Gecko/20100101 Firefox/16.0,gzip(gfe)'})
+    r = requests.get(url)
     soup = Soup(r.text)
 
     radar_urls = []
