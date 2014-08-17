@@ -8,6 +8,7 @@ from images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
 from twython import Twython
+#from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 
 APP_KEY = os.environ['APP_KEY']
 APP_SECRET = os.environ['APP_SECRET']
