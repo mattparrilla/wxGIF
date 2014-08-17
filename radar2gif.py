@@ -49,6 +49,7 @@ def make_gif(region_name):
 
     images = []
     for href in image_hrefs:
+        print href
         r = requests.get(href)
         images.append(Image.open(StringIO(r.content)))
 
