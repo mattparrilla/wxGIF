@@ -8,7 +8,7 @@ from images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
 from twython import Twython
-from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
+#from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 
 if not APP_KEY:
     APP_KEY = os.environ['APP_KEY']
@@ -22,7 +22,7 @@ def get_region(region_name):
     for radar images of specified region"""
 
     url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-    r = requests.get(url)
+    r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:16.0) Gecko/20100101 Firefox/16.0,gzip(gfe)'}))
     soup = Soup(r.text)
 
     radar_urls = []
