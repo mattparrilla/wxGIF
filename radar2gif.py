@@ -84,7 +84,7 @@ def make_gif(region_name):
             try:
                 images.append(Image.open(StringIO(r.content)))
             except IOError:
-                print "IOError: " + r.status_code
+                print "IOError: " + str(r.status_code)
                 continue
 
         size = (450, 450)
