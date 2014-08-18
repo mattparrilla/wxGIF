@@ -2,18 +2,23 @@
 import requests
 import pytz
 import os
+import socket
+from io import BytesIO
 from PIL import Image
 from datetime import datetime
 from images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
-from StringIO import StringIO
 from twython import Twython
-#from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 
-APP_KEY = os.environ['APP_KEY']
-APP_SECRET = os.environ['APP_SECRET']
-OAUTH_TOKEN = os.environ['OAUTH_TOKEN']
-OAUTH_TOKEN_SECRET = os.environ['OAUTH_TOKEN_SECRET']
+if socket.gethostname() == 'm':
+    from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
+    save_to_dir = 'gif'
+else:
+    APP_KEY = os.environ['APP_KEY']
+    APP_SECRET = os.environ['APP_SECRET']
+    OAUTH_TOKEN = os.environ['OAUTH_TOKEN']
+    OAUTH_TOKEN_SECRET = os.environ['OAUTH_TOKEN_SECRET']
+    save_to_dir = '/tmp'
 
 
 def get_region(region_name):
@@ -49,9 +54,8 @@ def make_gif(region_name):
 
     images = []
     for href in image_hrefs:
-        print href
         r = requests.get(href)
-        images.append(Image.open(StringIO(r.content)))
+        images.append(Image.open(BytesIO(r.content)))
 
     size = (450, 450)
     for im in images:
@@ -60,7 +64,7 @@ def make_gif(region_name):
     utc_stamp = datetime.strptime(image_hrefs[-1][-8:-4], "%H%M")
     time = utc_stamp + diff_from_utc('US/Eastern')
 
-    filename = '/tmp/%s-%s.GIF' % (region_name,
+    filename = '%s/%s-%s.GIF' % (save_to_dir, region_name,
         datetime.now().strftime('%Y%m%d-%H%M'))
     writeGif(filename, images, duration=0.1)
     return filename, time
