@@ -79,9 +79,11 @@ def make_gif(region_name):
         images = []
         for src in fresh_images:
             r = requests.get(src)
-            print src
-            print r.status_code
-            images.append(Image.open(StringIO(r.content)))
+            try:
+                images.append(Image.open(StringIO(r.content)))
+            except IOError:
+                print "IOError: " + r.status_code
+                continue
 
         size = (450, 450)
         for im in images:
@@ -97,6 +99,8 @@ def make_gif(region_name):
 
 
 def obtain_auth_url():
+    """Used to app to tweet to my account
+    NOT CALLED ANYWHERE"""
     twitter = Twython(APP_KEY, APP_SECRET)
     auth = twitter.get_authentication_tokens()
 
