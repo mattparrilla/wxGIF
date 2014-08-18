@@ -79,6 +79,8 @@ def make_gif(region_name):
         images = []
         for src in fresh_images:
             r = requests.get(src)
+            print src
+            print r.status_code
             images.append(Image.open(StringIO(r.content)))
 
         size = (450, 450)
