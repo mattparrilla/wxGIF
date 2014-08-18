@@ -35,7 +35,25 @@ def get_region(region_name):
         if region_name in href and "20" in href and "N0Ronly" not in href:
             radar_urls.append(url + href)
 
-    return radar_urls
+    updated_radar = fresh_check(radar_urls[-1], 10)
+
+    if updated_radar:
+        return radar_urls
+    else:
+        return False
+
+
+def fresh_check(url, minutes):
+    """Given a URL, gets the last-modified date of the resource and returns true
+    if the resource has been modified within N minutes"""
+    r = requests.get(url)
+    last_modified = r.headers['last-modified']
+    lm = datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S GMT")
+    time_updated = (datetime.utcnow() - lm).seconds
+
+    fresh = (minutes * 60) > time_updated
+
+    return fresh
 
 
 def diff_from_utc(zone):
@@ -50,24 +68,30 @@ def make_gif(region_name):
     """Takes a list of image hrefs and turns them into an animated GIF
     returns path to gif and datetimeobject of most recent radar image"""
 
-    image_hrefs = get_region(region_name)
+    fresh_images = get_region(region_name)
+    if fresh_images:
+        # need time of radar in addition to last-modified time b/c time of
+        # radar not always time image was uploaded
+        time_of_radar = fresh_images[-1][-8:-4]  # gets the time from filename
+        radar_datetime = datetime.strptime(time_of_radar, "%H%M")
+        time_in_est = radar_datetime + diff_from_utc('US/Eastern')
 
-    images = []
-    for href in image_hrefs:
-        r = requests.get(href)
-        images.append(Image.open(StringIO(r.content)))
+        images = []
+        for src in fresh_images:
+            r = requests.get(src)
+            images.append(Image.open(StringIO(r.content)))
 
-    size = (450, 450)
-    for im in images:
-        im.thumbnail(size, Image.ANTIALIAS)
+        size = (450, 450)
+        for im in images:
+            im.thumbnail(size, Image.ANTIALIAS)
 
-    utc_stamp = datetime.strptime(image_hrefs[-1][-8:-4], "%H%M")
-    time = utc_stamp + diff_from_utc('US/Eastern')
+        filename = '%s/%s-%s.GIF' % (save_to_dir, region_name,
+            datetime.now().strftime('%Y%m%d-%H%M'))
+        writeGif(filename, images, duration=0.1)
+        return filename, time_in_est
 
-    filename = '%s/%s-%s.GIF' % (save_to_dir, region_name,
-        datetime.now().strftime('%Y%m%d-%H%M'))
-    writeGif(filename, images, duration=0.1)
-    return filename, time
+    else:
+        return False, False
 
 
 def obtain_auth_url():
@@ -94,9 +118,13 @@ def tweet_gif(region):
 
     twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     gif, time = make_gif(region)
-    photo = open(gif, 'rb')
-    tweet = "Radar over the %s for the past few hours. Most recent image from %s #wx #GIF" % (
-        region.title(), time.strftime("%I:%M%p").lstrip("0"))
-    twitter.update_status_with_media(status=tweet, media=photo)
+    if gif:
+        photo = open(gif, 'rb')
+        tweet = "Radar over the %s for the past few hours. Most recent image from %s #wx #GIF" % (
+            region.title(), time.strftime("%I:%M%p").lstrip("0"))
+        twitter.update_status_with_media(status=tweet, media=photo)
+        print "Tweet sent at: " + datetime.now().strftime("%H:%M")
+    else:
+        print "Radar not fresh"
 
 tweet_gif("northeast")
