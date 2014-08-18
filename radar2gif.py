@@ -47,6 +47,7 @@ def fresh_check(url, minutes):
     """Given a URL, gets the last-modified date of the resource and returns true
     if the resource has been modified within N minutes"""
     r = requests.get(url)
+    print r.status_code
     last_modified = r.headers['last-modified']
     lm = datetime.strptime(last_modified, "%a, %d %b %Y %H:%M:%S GMT")
     time_updated = (datetime.utcnow() - lm).seconds
@@ -123,10 +124,16 @@ def tweet_gif(region):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+
+    # instead of time, read last tweet, if it's exactly the same as what
+    # is being pushed, don't push. Ensures no issues if cron cycle not
+    # exactly ten minutes
+
     gif, time = make_gif(region)
+
     if gif:
         photo = open(gif, 'rb')
-        tweet = "Radar over the %s for the past few hours. Most recent image from %s #wx #GIF" % (
+        tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF" % (
             region.title(), time.strftime("%I:%M%p").lstrip("0"))
         twitter.update_status_with_media(status=tweet, media=photo)
         print "Tweet sent at: " + datetime.now().strftime("%H:%M")
