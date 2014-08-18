@@ -35,7 +35,7 @@ def get_region(region_name):
         if region_name in href and "20" in href and "N0Ronly" not in href:
             radar_urls.append(url + href)
 
-    updated_radar = fresh_check(radar_urls[-1], 5)
+    updated_radar = fresh_check(radar_urls[-1], 15)
 
     if updated_radar:
         return radar_urls
