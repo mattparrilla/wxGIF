@@ -13,12 +13,14 @@ from twython import Twython
 if socket.gethostname() == 'm':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
     save_to_dir = 'gif'
+    bot = ''
 else:
     APP_KEY = os.environ['APP_KEY']
     APP_SECRET = os.environ['APP_SECRET']
     OAUTH_TOKEN = os.environ['OAUTH_TOKEN']
     OAUTH_TOKEN_SECRET = os.environ['OAUTH_TOKEN_SECRET']
     save_to_dir = '/tmp'
+    bot = 'bot'
 
 
 def get_region(region_name):
@@ -135,8 +137,8 @@ def tweet_gif(region):
 
     if gif:
         photo = open(gif, 'rb')
-        tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF" % (
-            region.title(), time.strftime("%I:%M%p").lstrip("0"))
+        tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF %s" % (
+            region.title(), time.strftime("%I:%M%p").lstrip("0"), bot)
         twitter.update_status_with_media(status=tweet, media=photo)
         print "Tweet sent at: " + datetime.now().strftime("%H:%M")
     else:
