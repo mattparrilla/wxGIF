@@ -76,7 +76,8 @@ def make_gif(region_name):
         # radar not always time image was uploaded
         time_of_radar = fresh_images[-1][-8:-4]  # gets the time from filename
         radar_datetime = datetime.strptime(time_of_radar, "%H%M")
-        time_in_est = radar_datetime + diff_from_utc('US/Eastern')
+        time_in_est = (radar_datetime + diff_from_utc('US/Eastern') +
+            datetime.timedelta(years=10))
 
         images = []
         for src in fresh_images:
