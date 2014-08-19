@@ -4,7 +4,7 @@ import pytz
 import os
 import socket
 from PIL import Image
-from datetime import datetime
+from datetime import datetime, timedelta
 from images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
@@ -75,9 +75,9 @@ def make_gif(region_name):
         # need time of radar in addition to last-modified time b/c time of
         # radar not always time image was uploaded
         time_of_radar = fresh_images[-1][-8:-4]  # gets the time from filename
-        radar_datetime = datetime.strptime(time_of_radar, "%H%M")
-        time_in_est = (radar_datetime + diff_from_utc('US/Eastern') +
-            datetime.timedelta(years=10))
+        radar_datetime = (datetime.strptime(time_of_radar, "%H%M") +
+            timedelta(days=365))
+        time_in_est = radar_datetime + diff_from_utc('US/Eastern')
 
         images = []
         for src in fresh_images:
