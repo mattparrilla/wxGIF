@@ -144,9 +144,9 @@ def tweet_gif(region, tweet=True):
             twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
             tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF" % (
                 region.title(), time)
-            print tweet
             photo = open(gif, 'rb')
             twitter.update_status_with_media(status=tweet, media=photo)
+            print tweet
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
 tweet_gif("northeast")
