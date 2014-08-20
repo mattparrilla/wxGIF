@@ -8,6 +8,7 @@ Very much a work in progress. Feel free to pull and contribute or clone and use 
 
 1. Abstract/clean code for other users
 2. Document steps from clone to tweet
+3. Increase quality of image
 3. Create twitter account for each region
 3. Only tweet when some threshold of activity
 4. Get working with individual radar stations
