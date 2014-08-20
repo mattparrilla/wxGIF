@@ -1,6 +1,6 @@
 #Weather GIFs
 
-This project generates GIFs of NWS radar images and auto tweets them hourly. Currently only tweeting GIFs of the northeast at the twitter handle [@wxGIF](http://twitter.com/wxgif).
+This project generates GIFs of NWS radar images and auto tweets them at regular times. Currently only tweeting GIFs of the northeast at the twitter handle [@wxGIF](http://twitter.com/wxgif).
 
 Very much a work in progress. Feel free to pull and contribute or clone and use it yourself!
 
@@ -15,6 +15,7 @@ Very much a work in progress. Feel free to pull and contribute or clone and use 
 5. Change base map + projection
 6. Change color palette.
 7. Incorporate warnings/watches
+8. Turn into web app
 
 ##License
 
