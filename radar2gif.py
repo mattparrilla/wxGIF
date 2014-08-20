@@ -25,6 +25,7 @@ else:
 
 region_to_tz = {'northeast': 'US/Eastern'}
 
+
 def get_region(region_name):
     """Parses NWS Radar Image Directory (see: http://radar.weather.gov/GIS.html)
     for radar images of specified region"""
@@ -128,7 +129,7 @@ def obtain_auth_url():
             + "'\nOAUTH_TOKEN_SECRET = '" + authorized['oauth_token_secret'] + "'")
 
 
-def tweet_gif(region, minutes_old=10, tweet=True):
+def tweet_gif(region, tweet=True):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     current_hour = arrow.now(region_to_tz[region]).hour
@@ -141,11 +142,11 @@ def tweet_gif(region, minutes_old=10, tweet=True):
 
         if tweet:
             twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-            tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF %s" % (
+            tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF" % (
                 region.title(), time)
             print tweet
             photo = open(gif, 'rb')
             twitter.update_status_with_media(status=tweet, media=photo)
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
-tweet_gif("northeast", 100, False)
+tweet_gif("northeast")
