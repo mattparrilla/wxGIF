@@ -130,16 +130,12 @@ def tweet_gif(region):
     if datetime.now().hour in [1, 10, 14, 18, 22]:
         twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
 
-        # instead of time, read last tweet, if it's exactly the same as what
-        # is being pushed, don't push. Ensures no issues if cron cycle not
-        # exactly ten minutes
-
         gif, time = make_gif(region)
 
         if gif:
             photo = open(gif, 'rb')
-            tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF %s" % (
-                region.title(), time.strftime("%I:%M%p").lstrip("0"), bot)
+            tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF" % (
+                region.title(), time.strftime("%I:%M%p").lstrip("0"))
             twitter.update_status_with_media(status=tweet, media=photo)
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
         else:
