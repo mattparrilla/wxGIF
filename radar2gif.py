@@ -135,7 +135,7 @@ def tweet_gif(region, size=450, tweet=True):
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
-    if not bot or current_hour in [6, 9, 12, 15, 17, 20, 23]:
+    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
         radar_urls = get_region(region)
         gif = make_gif(radar_urls, size)
         time = last_updated_radar(radar_urls[-1])
