@@ -135,16 +135,14 @@ def tweet_gif(region, tweet=True):
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
-    print current_hour
-    print bot
-    if not bot or current_hour in [6, 9, 12, 3, 5, 8, 11]:
+    if not bot or current_hour in [6, 9, 12, 15, 17, 20, 23]:
         radar_urls = get_region(region)
         gif = make_gif(radar_urls)
         time = last_updated_radar(radar_urls[-1])
 
         if tweet:
             twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-            tweet = "Radar over the %s for the past few hours. Most recent image from %s EST #wx #GIF" % (
+            tweet = "Radar over the %s for the past few hours. Most recent image from %s ET #wx #GIF" % (
                 region.title(), time)
             photo = open(gif, 'rb')
             twitter.update_status_with_media(status=tweet, media=photo)
