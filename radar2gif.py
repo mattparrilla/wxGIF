@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
-from twython import Twython
+from twython import Twython, exceptions
 
 if socket.gethostname() == 'm':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
@@ -76,7 +76,7 @@ def diff_from_utc(zone):
     return delta
 
 
-def make_gif(image_urls):
+def make_gif(image_urls, dimensions):
     """Takes a list of image hrefs and turns them into an animated GIF
     returns path to gif and datetimeobject of most recent radar image"""
 
@@ -89,7 +89,7 @@ def make_gif(image_urls):
             print "IOError: " + str(r.status_code)
             continue
 
-    size = (450, 450)
+    size = (dimensions, dimensions)
     for im in images:
         im.thumbnail(size, Image.ANTIALIAS)
 
@@ -129,7 +129,7 @@ def obtain_auth_url():
             + "'\nOAUTH_TOKEN_SECRET = '" + authorized['oauth_token_secret'] + "'")
 
 
-def tweet_gif(region, tweet=True):
+def tweet_gif(region, size=450, tweet=True):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     current_hour = arrow.now(region_to_tz[region]).hour
@@ -137,7 +137,7 @@ def tweet_gif(region, tweet=True):
     # if running manually or at appointed hour
     if not bot or current_hour in [6, 9, 12, 15, 17, 20, 23]:
         radar_urls = get_region(region)
-        gif = make_gif(radar_urls)
+        gif = make_gif(radar_urls, size)
         time = last_updated_radar(radar_urls[-1])
 
         if tweet:
@@ -149,4 +149,7 @@ def tweet_gif(region, tweet=True):
             print tweet
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
-tweet_gif("northeast")
+try:
+    tweet_gif("northeast")
+except exceptions.TwythonError:
+    tweet_gif("northeast", 400)
