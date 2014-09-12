@@ -152,5 +152,6 @@ def tweet_gif(region, size=450):
 #instead of this, check file size
 try:
     tweet_gif("northeast")
+    print "this is working"
 except exceptions.TwythonError:
     tweet_gif("northeast", 400)
