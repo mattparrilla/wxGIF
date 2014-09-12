@@ -104,7 +104,7 @@ def last_updated_radar(url):
     radar_datetime = (datetime.strptime(time_of_radar, "%H%M") +
         timedelta(days=365))
     time_in_est = radar_datetime + diff_from_utc('US/Eastern')
-    last_radar_time = time_in_est.strftime("%I:%M%p").lstrip("0")
+    last_radar_time = time_in_est.strftime("%I:%M").lstrip("0")
     return last_radar_time
 
 
@@ -142,7 +142,7 @@ def tweet_gif(region, size=450):
 
         if bot:
             twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-            tweet = "Radar over the %s for the past few hours. Most recent image from %s ET #wx #GIF" % (
+            tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #vawx #nhwx #njwx" % (
                 region.title(), time)
             photo = open(gif, 'rb')
             twitter.update_status_with_media(status=tweet, media=photo)
