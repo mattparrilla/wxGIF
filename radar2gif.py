@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
-from twython import Twython, exceptions
+from twython import Twython
 
 if socket.gethostname() == 'm':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
@@ -135,7 +135,7 @@ def tweet_gif(region, size=600):
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
-    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
+    if not bot or current_hour in [0, 3, 6, 9, 10, 12, 15, 18, 21]:
         radar_urls = get_region(region)
         gif = make_gif(radar_urls, size)
         while os.path.getsize(gif) > 3000000:
