@@ -153,4 +153,5 @@ def tweet_gif(region, size=450):
 try:
     tweet_gif("northeast")
 except exceptions.TwythonError:
+    print "First try was too large"
     tweet_gif("northeast", 400)
