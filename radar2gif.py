@@ -135,7 +135,7 @@ def tweet_gif(region, size=450):
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
-    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
+    if not bot or current_hour in [0, 3, 6, 9, 10, 12, 15, 18, 21]:
         radar_urls = get_region(region)
         gif = make_gif(radar_urls, size)
         time = last_updated_radar(radar_urls[-1])
@@ -152,6 +152,5 @@ def tweet_gif(region, size=450):
 #instead of this, check file size
 try:
     tweet_gif("northeast")
-    print "this is working"
 except exceptions.TwythonError:
     tweet_gif("northeast", 400)
