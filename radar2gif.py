@@ -89,9 +89,9 @@ def make_gif(image_urls, dimensions):
             print "IOError: " + str(r.status_code)
             continue
 
-    #size = (dimensions, dimensions)
-    #for im in images:
-    #    im.thumbnail(size, Image.ANTIALIAS)
+    size = (dimensions, dimensions)
+    for im in images:
+        im.thumbnail(size, Image.ANTIALIAS)
 
     # save as filename of last image
     filename = '%s/%s' % (save_to_dir, image_urls[-1].split('/')[-1])
@@ -129,7 +129,7 @@ def obtain_auth_url():
             + "'\nOAUTH_TOKEN_SECRET = '" + authorized['oauth_token_secret'] + "'")
 
 
-def tweet_gif(region, size=450):
+def tweet_gif(region, size=600):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     current_hour = arrow.now(region_to_tz[region]).hour
@@ -138,6 +138,10 @@ def tweet_gif(region, size=450):
     if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
         radar_urls = get_region(region)
         gif = make_gif(radar_urls, size)
+        while os.path.getsize(gif) > 3000000:
+            size -= 50
+            gif = make_gif(radar_urls, size)
+
         time = last_updated_radar(radar_urls[-1])
 
         if bot:
@@ -149,8 +153,4 @@ def tweet_gif(region, size=450):
             print tweet
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
-#instead of this, check file size
-try:
-    tweet_gif("northeast")
-except exceptions.TwythonError:
-    tweet_gif("northeast", 400)
+tweet_gif("northeast")
