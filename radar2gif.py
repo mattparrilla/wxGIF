@@ -6,12 +6,12 @@ import socket
 import arrow
 from PIL import Image
 from datetime import datetime, timedelta
-from images2gif import writeGif
+from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
 from twython import Twython
 
-if socket.gethostname() == 'm':
+if socket.gethostname() == 'm' or socket.gethostname() == 'matt.local':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
     save_to_dir = 'gif'
     bot = False
@@ -26,10 +26,29 @@ else:
 region_to_tz = {'northeast': 'US/Eastern'}
 
 
-def get_region(region_name):
-    """Parses NWS Radar Image Directory (see: http://radar.weather.gov/GIS.html)
-    for radar images of specified region"""
+def get_map_bounds(region_name):
+    base_url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
+    map_dimensions = (840, 800)
+    radar_urls = get_all_radar_urls()
+    for href in radar_urls:
+        if region_name in href and ".gfw" in href:
+            gfw = href
 
+    r = requests.get(base_url + gfw)
+    gfw = r.text.replace('\r', '').split('\n')
+    for i, x in enumerate(gfw):
+        gfw[i] = float(x)
+
+    top_left_coords = (gfw[4], gfw[5])
+    bottom_right_coords = ((gfw[4] + map_dimensions[0] * gfw[0]),
+        (gfw[5] + map_dimensions[1] * gfw[3]))
+
+    print "The bounding coordinates are (%f, %f) and (%f, %f)" % (
+        top_left_coords[0], top_left_coords[1], bottom_right_coords[0],
+        bottom_right_coords[1])
+
+
+def get_all_radar_urls():
     # get document with list of radar image locations
     url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
     r = requests.get(url)
@@ -39,15 +58,28 @@ def get_region(region_name):
     radar_urls = []
     for link in soup.findAll("a"):
         href = link.get("href")
-        # URL has form http://[url]/regionname_YYYYMMDD_HHMM.gif
+        radar_urls.append(href)
+
+    return radar_urls
+
+
+def get_region(region_name):
+    """Parses NWS Radar Image Directory (see: http://radar.weather.gov/GIS.html)
+    for radar images of specified region"""
+    base_url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
+
+    regional_urls = []
+    radar_urls = get_all_radar_urls()
+    # URL has form http://[url]/regionname_YYYYMMDD_HHMM.gif
+    for href in radar_urls:
         if region_name in href and "20" in href and "N0Ronly" not in href:
-            radar_urls.append(url + href)
+            regional_urls.append(base_url + href)
 
     #updated_radar = fresh_check(radar_urls[-1], 15)
     updated_radar = True
 
     if updated_radar:
-        return radar_urls
+        return regional_urls
     else:
         return False
 
@@ -153,4 +185,4 @@ def tweet_gif(region, size=600):
             print tweet
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
-tweet_gif("northeast")
+get_map_bounds('northeast')
