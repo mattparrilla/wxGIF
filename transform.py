@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import requests
+from PIL import Image
 import os
 
 nws_colors = [(152, 84, 198, 255),
@@ -24,7 +24,8 @@ nws_colors = [(152, 84, 198, 255),
     (232, 232, 232, 255),
     (235, 235, 235, 255),
     (238, 238, 238, 255),
-    (240, 240, 240, 255)]
+    (240, 240, 240, 255),
+    (255, 255, 255, 255)]
 
 new_colors = [(0, 0, 0, 255),
     (50, 0, 0, 255),
@@ -47,29 +48,8 @@ new_colors = [(0, 0, 0, 255),
     (134, 79, 162, 115),
     (144, 79, 162, 85),
     (144, 79, 162, 55),
-    (154, 79, 162, 55)]
-
-
-def get_map_bounds(region_name):
-    base_url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-    map_dimensions = (840, 800)
-    radar_urls = get_all_radar_urls()
-    for href in radar_urls:
-        if region_name in href and ".gfw" in href:
-            gfw = href
-
-    r = requests.get(base_url + gfw)
-    gfw = r.text.replace('\r', '').split('\n')
-    for i, x in enumerate(gfw):
-        gfw[i] = float(x)
-
-    top_left_coords = (gfw[4], gfw[5])
-    bottom_right_coords = ((gfw[4] + map_dimensions[0] * gfw[0]),
-        (gfw[5] + map_dimensions[1] * gfw[3]))
-
-    print "The bounding coordinates are (%f, %f) and (%f, %f)" % (
-        top_left_coords[0], top_left_coords[1], bottom_right_coords[0],
-        bottom_right_coords[1])
+    (154, 79, 162, 55),
+    (255, 255, 255, 0)]
 
 
 def change_palette(images):
@@ -77,27 +57,67 @@ def change_palette(images):
     converts the NWS palette to a new palette, returns list of filenames"""
 
     image_list = []
-    for im in images:
-        pixels = im['image'].load()
+    for image in images:
+        name = image.split('.')[0].split('/')[-1]
+        im = Image.open(image).convert("RGBA")
+        pixels = im.load()
 
-        for i in range(im['image'].size[0]):
-            for j in range(im['image'].size[1]):
+        for i in range(im.size[0]):
+            for j in range(im.size[1]):
                 if pixels[i, j] in nws_colors:
                     pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
 
-        name = im['name'].split('.')[0]
         filename = "gif/frames/%s.%s" % (name, "PNG")
-        im['image'].save(filename, "PNG")
+        im.save(filename, "PNG")
         image_list.append(filename)
 
     return image_list
+
+
+def change_basemap(filename="basemap/northeast-outline.png"):
+    im = Image.open(filename)
+    pixels = im.load()
+    print pixels[0, 1]
+    for i in range(im.size[0]):
+        for j in range(im.size[1]):
+            if pixels[i, j] == (134, 134, 134, 127):
+                pixels[i, j] = (255, 255, 255, 0)
+
+    filename = "basemap/test.PNG"
+    im.save(filename, "PNG")
+
+
+def add_basemap(radar, region="northeast"):
+    basemap = "basemap/%s.png" % region
+    background = Image.open(basemap)
+    foreground = Image.open(radar)
+    combined = "gif/frames_bm/%s-bm.png" % radar.split('/')[-1].split('.')[0]
+
+    background.paste(foreground, (0, 0), foreground)
+    background.save(combined, "PNG")
+
+    outline = "basemap/%s-outline.png" % region
+    bg_2 = Image.open(combined)
+    fg_2 = Image.open(outline)
+
+    final_image = "gif/completed_frames/%s.png" % (
+        radar.split('/')[-1].split('.')[0])
+
+    bg_2.paste(fg_2, (0, 0), fg_2)
+    bg_2.save(final_image, "PNG")
+
+    # crop image
+    crop_image = Image.open(final_image)
+    w, h = crop_image.size
+    crop_image.crop((0, 91, w, h - 211)).save(final_image, "PNG")
+
+    return final_image
 
 
 def change_projection(f, old_projection='EPSG:4269', new_projection='EPSG:3857'):
     """Change the projection of the GIF with accompanying world file
     By default changes NWS projection to Google Mercator"""
 
-    print f
     filename, extension = f.split('.')
     gdalwarp = 'gdalwarp -s_srs %s -t_srs %s %s %s_new.%s' % (old_projection,
         new_projection, f, filename, extension)
