@@ -10,6 +10,7 @@ from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
 from twython import Twython
+from transform import nws_colors, new_colors
 
 if socket.gethostname() == 'm' or socket.gethostname() == 'matt.local':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
@@ -72,7 +73,7 @@ def get_region(region_name):
     radar_urls = get_all_radar_urls()
     # URL has form http://[url]/regionname_YYYYMMDD_HHMM.gif
     for href in radar_urls:
-        if region_name in href and "20" in href and "N0Ronly" not in href:
+        if region_name in href and "20" in href and "N0Ronly" in href:
             regional_urls.append(base_url + href)
 
     #updated_radar = fresh_check(radar_urls[-1], 15)
@@ -116,14 +117,15 @@ def make_gif(image_urls, dimensions):
     for src in image_urls:
         r = requests.get(src)
         try:
-            images.append(Image.open(StringIO(r.content)))
+            images.append({'name': src.split('/')[-1],
+                'image': Image.open(StringIO(r.content)).convert("RGBA")})
         except IOError:
             print "IOError: " + str(r.status_code)
             continue
 
-    size = (dimensions, dimensions)
-    for im in images:
-        im.thumbnail(size, Image.ANTIALIAS)
+   # size = (dimensions, dimensions)
+   # for im in images:
+   #     im.thumbnail(size, Image.ANTIALIAS)
 
     # save as filename of last image
     filename = '%s/%s' % (save_to_dir, image_urls[-1].split('/')[-1])
@@ -131,8 +133,25 @@ def make_gif(image_urls, dimensions):
     return filename
 
 
+def change_palette(images):
+    image_list = []
+    for im in images:
+        pixels = im['image'].load()
+
+        for i in range(im['image'].size[0]):
+            for j in range(im['image'].size[1]):
+                if pixels[i, j] in nws_colors:
+                    pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
+
+        name = im['name'].split('.')[0]
+        im['image'].save("gif/frames/%s.%s" % (name, "PNG"), "PNG")
+        image_list.append(im['image'])
+
+    return image_list
+
+
 def last_updated_radar(url):
-    time_of_radar = url.split('/')[-1].split('.')[0].split('_')[-1]
+    time_of_radar = url.split('/')[-1].split('.')[0].split('_')[-2]
     radar_datetime = (datetime.strptime(time_of_radar, "%H%M") +
         timedelta(days=365))
     time_in_est = radar_datetime + diff_from_utc('US/Eastern')
@@ -170,7 +189,7 @@ def tweet_gif(region, size=600):
     if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
         radar_urls = get_region(region)
         gif = make_gif(radar_urls, size)
-        while os.path.getsize(gif) > 3000000:
+        while os.path.getsize(gif) > 9000000:
             size -= 50
             gif = make_gif(radar_urls, size)
 
@@ -185,4 +204,4 @@ def tweet_gif(region, size=600):
             print tweet
             print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
-get_map_bounds('northeast')
+tweet_gif('northeast')

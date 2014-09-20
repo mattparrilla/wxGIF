@@ -9,6 +9,7 @@ trash
 app/static/img/thumbnails
 .sass-cache
 *.GIF
+gif/frames/*.PNG
 
 # C extensions
 *.so
