@@ -10,7 +10,7 @@ from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from StringIO import StringIO
 from twython import Twython
-from transform import nws_colors, new_colors
+from transform import change_palette, change_projection
 
 if socket.gethostname() == 'm' or socket.gethostname() == 'matt.local':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
@@ -25,28 +25,6 @@ else:
     bot = True
 
 region_to_tz = {'northeast': 'US/Eastern'}
-
-
-def get_map_bounds(region_name):
-    base_url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-    map_dimensions = (840, 800)
-    radar_urls = get_all_radar_urls()
-    for href in radar_urls:
-        if region_name in href and ".gfw" in href:
-            gfw = href
-
-    r = requests.get(base_url + gfw)
-    gfw = r.text.replace('\r', '').split('\n')
-    for i, x in enumerate(gfw):
-        gfw[i] = float(x)
-
-    top_left_coords = (gfw[4], gfw[5])
-    bottom_right_coords = ((gfw[4] + map_dimensions[0] * gfw[0]),
-        (gfw[5] + map_dimensions[1] * gfw[3]))
-
-    print "The bounding coordinates are (%f, %f) and (%f, %f)" % (
-        top_left_coords[0], top_left_coords[1], bottom_right_coords[0],
-        bottom_right_coords[1])
 
 
 def get_all_radar_urls():
@@ -123,31 +101,20 @@ def make_gif(image_urls, dimensions):
             print "IOError: " + str(r.status_code)
             continue
 
-   # size = (dimensions, dimensions)
-   # for im in images:
-   #     im.thumbnail(size, Image.ANTIALIAS)
+    image_list = change_palette(images)
 
-    # save as filename of last image
+    transformed_images = []
+    for image in image_list:
+        im = change_projection(image)
+        transformed_images.append(Image.open(im))
+
+    #size = (dimensions, dimensions)
+    #for im in images:
+    #    im.thumbnail(size, Image.ANTIALIAS)
+
     filename = '%s/%s' % (save_to_dir, image_urls[-1].split('/')[-1])
-    writeGif(filename, images, duration=0.1)
+    writeGif(filename, transformed_images, duration=0.1)
     return filename
-
-
-def change_palette(images):
-    image_list = []
-    for im in images:
-        pixels = im['image'].load()
-
-        for i in range(im['image'].size[0]):
-            for j in range(im['image'].size[1]):
-                if pixels[i, j] in nws_colors:
-                    pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
-
-        name = im['name'].split('.')[0]
-        im['image'].save("gif/frames/%s.%s" % (name, "PNG"), "PNG")
-        image_list.append(im['image'])
-
-    return image_list
 
 
 def last_updated_radar(url):
