@@ -182,7 +182,7 @@ def tweet_gif(region, size=450, remove_frame=0):
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
-    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 19, 21]:
+    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
         gif, frames = make_gif(region)
         while os.path.getsize(gif) > 3000000:
             print "Resize Necessary: %s" % os.path.getsize(gif)
