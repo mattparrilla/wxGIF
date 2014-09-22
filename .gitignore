@@ -10,6 +10,8 @@ app/static/img/thumbnails
 .sass-cache
 *.GIF
 gif/frames/*.PNG
+*.gfw
+northeast_201*
 
 # C extensions
 *.so

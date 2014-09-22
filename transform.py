@@ -42,36 +42,46 @@ new_colors = [(0, 0, 0, 255),
     (50, 136, 189, 255),
     (94, 79, 162, 255),
     # Below colors are mostly white
-    (104, 79, 162, 215),
-    (114, 79, 162, 175),
-    (124, 79, 162, 145),
-    (134, 79, 162, 115),
-    (144, 79, 162, 85),
-    (144, 79, 162, 55),
-    (154, 79, 162, 55),
+    #(104, 79, 162, 150),
+    #(114, 79, 162, 120),
+    #(124, 79, 162, 90),
+    #(134, 79, 162, 80),
+    #(144, 79, 162, 70),
+    #(144, 79, 162, 60),
+    #(154, 79, 162, 0),
+    (150, 150, 150, 150),
+    (150, 150, 150, 130),
+    (150, 150, 150, 110),
+    (150, 150, 150, 90),
+    (150, 150, 150, 70),
+    (150, 150, 150, 50),
+    (150, 150, 150, 30),
     (255, 255, 255, 0)]
 
 
-def change_palette(images):
+def change_palette(image):
     """Takes a list of dicts of images {'name': name, 'image': PIL.Image}
     converts the NWS palette to a new palette, returns list of filenames"""
 
-    image_list = []
-    for image in images:
-        name = image.split('.')[0].split('/')[-1]
-        im = Image.open(image).convert("RGBA")
-        pixels = im.load()
+    name = image.split('.')[0].split('/')[-1]
+    im = Image.open(image).convert("RGBA")
+    pixels = im.load()
 
-        for i in range(im.size[0]):
-            for j in range(im.size[1]):
-                if pixels[i, j] in nws_colors:
-                    pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
+    for i in range(im.size[0]):
+        for j in range(im.size[1]):
+            if pixels[i, j] in nws_colors:
+                pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
 
-        filename = "gif/frames/%s.%s" % (name, "PNG")
-        im.save(filename, "PNG")
-        image_list.append(filename)
+    filename = "gif/new_palette/%s.%s" % (name, "png")
+    im.save(filename, "PNG")
 
-    return image_list
+    return filename
+
+
+def resize_image(image, dimensions):
+    im = Image.open(image)
+    im.thumbnail(dimensions)
+    return im
 
 
 def change_basemap(filename="basemap/northeast-outline.png"):
@@ -84,43 +94,47 @@ def change_basemap(filename="basemap/northeast-outline.png"):
                 pixels[i, j] = (255, 255, 255, 0)
 
     filename = "basemap/test.PNG"
-    im.save(filename, "PNG")
+    im.save(filename, "PNG", dpi=[100, 100])
 
 
-def add_basemap(radar, region="northeast"):
-    basemap = "basemap/%s.png" % region
+def add_basemap(radar, width="708", region="northeast"):
+    basemap = "basemap/%s-%s.png" % (region, width)
     background = Image.open(basemap)
     foreground = Image.open(radar)
-    combined = "gif/frames_bm/%s-bm.png" % radar.split('/')[-1].split('.')[0]
+    combined = "gif/basemap/%s-bm.png" % radar.split('/')[-1].split('.')[0]
 
     background.paste(foreground, (0, 0), foreground)
-    background.save(combined, "PNG")
+    background.save(combined, "PNG", optimize=True)
 
-    outline = "basemap/%s-outline.png" % region
+    outline = "basemap/%s-outline-%s.png" % (region, width)
     bg_2 = Image.open(combined)
     fg_2 = Image.open(outline)
 
-    final_image = "gif/completed_frames/%s.png" % (
+    final_image = "gif/basemap_and_overlay/%s.png" % (
         radar.split('/')[-1].split('.')[0])
 
     bg_2.paste(fg_2, (0, 0), fg_2)
-    bg_2.save(final_image, "PNG")
-
-    # crop image
-    crop_image = Image.open(final_image)
-    w, h = crop_image.size
-    crop_image.crop((0, 91, w, h - 211)).save(final_image, "PNG")
+    bg_2.convert("P").save(final_image, "PNG", optimize=True)
 
     return final_image
+
+
+def crop_image(image):
+    cropped = Image.open(image)
+    w, h = cropped.size
+    cropped.crop((0, 91, w, h - 211)).save(image, "PNG", optimize=True, bits=8)
+    return image
 
 
 def change_projection(f, old_projection='EPSG:4269', new_projection='EPSG:3857'):
     """Change the projection of the GIF with accompanying world file
     By default changes NWS projection to Google Mercator"""
 
-    filename, extension = f.split('.')
-    gdalwarp = 'gdalwarp -s_srs %s -t_srs %s %s %s_new.%s' % (old_projection,
-        new_projection, f, filename, extension)
+    path, extension = f.split('.')
+    filename = path.split('/')[-1]
+    new_path = 'gif/new_projection'
+    gdalwarp = 'gdalwarp -s_srs %s -t_srs %s %s %s/%s-proj.%s' % (
+        old_projection, new_projection, f, new_path, filename, extension)
     os.system(gdalwarp)
 
-    return "%s_new.%s" % (filename, extension)
+    return "%s/%s-proj.%s" % (new_path, filename, extension)

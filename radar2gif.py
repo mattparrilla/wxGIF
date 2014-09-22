@@ -5,15 +5,13 @@ import pytz
 import os
 import socket
 import arrow
-from os import listdir
-from os.path import isfile, join
 from PIL import Image
 from datetime import datetime, timedelta
 from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
-from StringIO import StringIO
 from twython import Twython
-from transform import change_palette, change_projection, add_basemap
+from transform import (change_palette, change_projection, add_basemap,
+    resize_image, crop_image)
 
 if socket.gethostname() == 'm' or socket.gethostname() == 'matt.local':
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
@@ -56,13 +54,7 @@ def get_region(region_name):
         if region_name in href and "20" in href and "N0Ronly" in href:
             regional_urls.append(BASE_URL + href)
 
-    #updated_radar = fresh_check(radar_urls[-1], 15)
-    updated_radar = True
-
-    if updated_radar:
-        return regional_urls
-    else:
-        return False
+    return regional_urls
 
 
 def check_freshness(url, minutes):
@@ -90,11 +82,13 @@ def diff_from_utc(zone):
 
 
 def download_radar_images(region):
+    print "Downloading radar images and world file"
     image_urls = get_region(region)
     images = []
     wf_url = "%s/%s_radaronly.gfw" % (BASE_URL, region)
     wf = requests.get(wf_url)
     for src in image_urls:
+        print "Downloading: %s" % src
         r = requests.get(src, stream=True)
         if r.status_code == 200:
             name = "gif/source/%s" % src.split('/')[-1]
@@ -105,39 +99,51 @@ def download_radar_images(region):
             with open(wf_name, "wb") as f:
                 f.write(wf.text)
             images.append(name)
+
+    print "All images downloaded"
     return images
 
 
-def make_gif(region, dimensions, resize=False):
-#    if resize:
-#        image_dir = "gif/completed_frames"
-#        image_list = ["%s/%s" % (image_dir, f) for f in listdir(image_dir)
-#            if isfile(join(image_dir, f)) and "DS_Store" not in f]
-#
-#    else:
+def make_gif(region):
     images = download_radar_images(region)
-    new_projections = []
-    for im in images:
-        new_projections.append(change_projection(im))
 
-    image_list = change_palette(new_projections)
+    print "\nChanging radar projection"
+    new_projections = [change_projection(im) for im in images]
 
-    frames = resize_convert_images(image_list, dimensions, resize)
+    print "\nChanging radar palette"
+    image_list = [change_palette(im) for im in new_projections]
+    print "Done"
 
+    print "\nAdding basemap"
+    frames = [add_basemap(image) for image in image_list]
+    print "Done"
+
+    print "\nCropping image"
+    cropped = [crop_image(image) for image in frames]
+    print "Done"
+
+    print "\nConvert image format"
+    cropped_frames = [Image.open(im) for im in cropped]
+
+    print "\nScaling down for Twitter"
+    size = (450, 450)
+    cropped_thumbnails = [resize_image(image, size) for image in cropped]
+
+    print "\nMaking GIF"
     filename = '%s/%s.gif' % (SAVE_TO_DIR, region)
-    writeGif(filename, frames, duration=0.1)
-    return filename
+    writeGif(filename, cropped_frames, duration=0.1)
+
+    thumbnail_f = '%s/%s-twitter.gif' % (SAVE_TO_DIR, region)
+    writeGif(thumbnail_f, cropped_thumbnails, duration=0.12)
+
+    return thumbnail_f, cropped_thumbnails
 
 
-def resize_convert_images(image_list, dimensions, resize):
-    frames = []
-    for idx, image in enumerate(image_list):
-#        if not resize:
-        image = add_basemap(image)
-        im = Image.open(image)
-        im.thumbnail(dimensions, Image.ANTIALIAS)
-        frames.append(im.convert("P"))
-    return frames
+def resize_gif(region, frames, idx):
+    thumbnail_f = '%s/%s-twitter.gif' % (SAVE_TO_DIR, region)
+    writeGif(thumbnail_f, frames[idx:], duration=0.12)
+
+    return thumbnail_f
 
 
 def last_updated_radar(url):
@@ -170,18 +176,18 @@ def obtain_auth_url():
             + "'\nOAUTH_TOKEN_SECRET = '" + authorized['oauth_token_secret'] + "'")
 
 
-def tweet_gif(region, size=450):
+def tweet_gif(region, size=450, remove_frame=0):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
     if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
-        gif = make_gif(region, dimensions=(size, size))
-       # while os.path.getsize(gif) > 2900000:
-       #     print "Resize Necessary: %s" % os.path.getsize(gif)
-       #     size -= 20
-       #     gif = make_gif(region, dimensions=(size, size), resize=True)
+        gif, frames = make_gif(region)
+        while os.path.getsize(gif) > 3000000:
+            print "Resize Necessary: %s" % os.path.getsize(gif)
+            remove_frame += 1
+            gif = resize_gif(region, frames, remove_frame)
 
         time = last_updated_radar(get_region(region)[-1])
 
