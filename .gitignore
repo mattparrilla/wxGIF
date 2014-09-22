@@ -8,7 +8,6 @@ venv
 trash
 app/static/img/thumbnails
 .sass-cache
-*.GIF
 gif/frames/*.PNG
 *.gfw
 northeast_201*
