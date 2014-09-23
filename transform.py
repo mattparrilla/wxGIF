@@ -122,7 +122,7 @@ def add_basemap(radar, width="708", region="northeast"):
 def crop_image(image):
     cropped = Image.open(image)
     w, h = cropped.size
-    cropped.crop((0, 91, w, h - 211)).save(image, "PNG", optimize=True, bits=8)
+    cropped.crop((0, 91, w, h - 211)).save(image, "PNG", optimize=True)
     return image
 
 

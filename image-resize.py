@@ -18,6 +18,6 @@ import os
 #optimize.save('test/optimize.png', "PNG", optimize=True)
 #print "Optimized size: %s" % os.path.getsize('test/optimize.png')
 
-convert = Image.open('basemap/northeast-outline-708-3-converted.png')
-convert.convert('RGBA').save('basemap/northeast-outline-708-3-converted.png', "PNG", optimize=True)
-print "Converted size: %s" % os.path.getsize('basemap/northeast-outline-708-3-converted.png')
+convert = Image.open('basemap/green-northeast-708.png')
+convert.convert('P').save('test/green.png', "PNG", optimize=True)
+print "Converted size: %s" % os.path.getsize('test/green.png')
