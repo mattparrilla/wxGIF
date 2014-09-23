@@ -13,7 +13,7 @@ from twython import Twython
 from transform import (change_palette, change_projection, add_basemap,
     resize_image, crop_image)
 
-if socket.gethostname() == 'm' or socket.gethostname() == 'matt.local':
+if socket.gethostname() == 'm' or 'matt' in socket.gethostname():
     from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
     SAVE_TO_DIR = 'gif'
     bot = False
