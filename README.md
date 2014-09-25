@@ -4,6 +4,23 @@ This project generates GIFs of NWS radar images and auto tweets them at regular 
 
 Very much a work in progress. Feel free to pull and contribute or clone and use it yourself!
 
+##To Make Your Own GIF
+
+Currently, you'd probably need to be a developer (or at least are able to use the command line) but I have plans to create a web interface in the future (see below)
+
+Dependencies: `gdal`, `virtualenv`, `pip`
+
+Here are the current steps (to be entered in the command line) required to generate a GIF for the northeast:
+
+1. `git clone git@github.com:mattparrilla/wxGIF.git`
+2. `cd wxGIF`
+3. `virtualenv venv`
+4. `source venv/bin/activate`
+5. `pip install -r requirements.txt`
+6. `python radar2gif.py`
+
+Look inside the `gif/` directory and you'll see `northeast.gif` the full-sized GIF of the radar for the northeast. `northeast-twitter.gif` is a twitter-sized version of the same image (twitter requires GIFs to be below 3MB in size in order to upload them via the API).
+
 ##Next Steps
 
 1. Abstract/clean code for other users
@@ -12,8 +29,8 @@ Very much a work in progress. Feel free to pull and contribute or clone and use 
 3. Create twitter account for each region
 3. Only tweet when some threshold of activity
 4. Get working with individual radar stations
-5. Change base map + projection
-6. Change color palette.
+5. ~~Change base map + projection~~
+6. ~~Change color palette.~~
 7. Incorporate warnings/watches
 8. Turn into web app
 
