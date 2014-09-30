@@ -97,8 +97,8 @@ def change_basemap(filename="basemap/northeast-outline.png"):
     im.save(filename, "PNG", dpi=[100, 100])
 
 
-def add_basemap(radar, width="708", region="northeast"):
-    basemap = "basemap/%s-%s.png" % (region, width)
+def add_basemap(radar, region="northeast"):
+    basemap = "basemap/%s.png" % region
     background = Image.open(basemap)
     foreground = Image.open(radar)
     combined = "gif/basemap/%s-bm.png" % radar.split('/')[-1].split('.')[0]
@@ -106,7 +106,7 @@ def add_basemap(radar, width="708", region="northeast"):
     background.paste(foreground, (0, 0), foreground)
     background.save(combined, "PNG", optimize=True)
 
-    outline = "basemap/%s-outline-%s-2.png" % (region, width)
+    outline = "basemap/%s-outline.png" % region
     bg_2 = Image.open(combined)
     fg_2 = Image.open(outline)
 
