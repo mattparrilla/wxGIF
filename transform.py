@@ -104,19 +104,9 @@ def add_basemap(radar, region="northeast"):
     combined = "gif/basemap/%s-bm.png" % radar.split('/')[-1].split('.')[0]
 
     background.paste(foreground, (0, 0), foreground)
-    background.save(combined, "PNG", optimize=True)
+    background.convert("P").save(combined, "PNG", optimize=True)
 
-    outline = "basemap/%s-outline.png" % region
-    bg_2 = Image.open(combined)
-    fg_2 = Image.open(outline)
-
-    final_image = "gif/basemap_and_overlay/%s.png" % (
-        radar.split('/')[-1].split('.')[0])
-
-    bg_2.paste(fg_2, (0, 0), fg_2)
-    bg_2.convert("P").save(final_image, "PNG", optimize=True)
-
-    return final_image
+    return combined
 
 
 def crop_image(image):
