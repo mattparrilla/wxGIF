@@ -11,7 +11,7 @@ from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from twython import Twython
 from transform import (change_palette, change_projection, add_basemap,
-    resize_image, crop_image)
+    resize_image, crop_image, get_timestamp)
 
 if socket.gethostname() == 'm' or 'matt' in socket.gethostname():
     SAVE_TO_DIR = 'gif'
@@ -119,11 +119,15 @@ def make_gif(region, dimensions):
     image_list = [change_palette(im) for im in new_projections]
     print "Done"
 
+    print "\nGet timestamps"
+    timestamps = [get_timestamp(image) for image in image_list]
+
     print "\nResize Image"
     thumbnails = [resize_image(image, dimensions) for image in image_list]
 
     print "\nAdding basemap"
-    frames = [add_basemap(image, idx) for idx, image in enumerate(thumbnails)]
+    frames = [add_basemap(image, timestamps[idx]) for idx,
+        image in enumerate(thumbnails)]
     print "Done"
 
     print "\nCropping image"
@@ -135,7 +139,7 @@ def make_gif(region, dimensions):
 
     print "\nMaking GIF"
     filename = '%s/%s.gif' % (SAVE_TO_DIR, region)
-    writeGif(filename, cropped_frames, duration=0.1)
+    writeGif(filename, cropped_frames, duration=0.125)
 
     return filename, cropped_frames
 

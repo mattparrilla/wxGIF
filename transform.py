@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import os
 
 nws_colors = [(152, 84, 198, 255),
@@ -97,18 +97,49 @@ def change_basemap(filename="basemap/northeast-outline.png"):
     im.save(filename, "PNG", dpi=[100, 100])
 
 
-def add_basemap(radar, idx, region="northeast"):
-    basemap = "basemap/%s-gray.png" % region
-    background = Image.open(basemap)
-    foreground = radar
+def add_basemap(radar, timestamp, region="northeast"):
+    basemap = "basemap/%s.png" % region
+    background = basemap_text(Image.open(basemap))
+    foreground = add_timestamp(radar, timestamp)
     combined = "gif/basemap/%s-bm-%s.png" % (
         basemap.split('/')[-1].split('.')[0],
-        idx)
+        timestamp)
 
     background.paste(foreground, (0, 0), foreground)
     background.convert("P").save(combined, "PNG", optimize=True)
 
     return combined
+
+
+def get_timestamp(filename):
+    time = filename.split('/')[-1].split('_')[2]
+    timestamp = time[:2] + ":" + time[2:]
+    return timestamp
+
+
+def add_timestamp(image, timestamp):
+    draw = ImageDraw.Draw(image)
+    w, h = image.size
+    x_pos = 10
+    y_pos = 40
+    font = ImageFont.truetype('fonts/rokkitt.otf', 22)
+
+    draw.text((x_pos, y_pos), timestamp, (100, 100, 100), font=font)
+    return image
+
+
+def basemap_text(image):
+    """Adds branding to image"""
+    draw = ImageDraw.Draw(image)
+    w, h = image.size
+    x_pos = w - 220
+    y_pos = h - 100
+    font = ImageFont.truetype('fonts/raleway.otf', 55)
+    small_font = ImageFont.truetype('fonts/raleway.otf', 18)
+
+    draw.text((x_pos, y_pos), "@wxGIF", (255, 255, 255), font=font)
+    draw.text((x_pos + 5, y_pos + 62), "Radar, made for Twitter", font=small_font)
+    return image
 
 
 def crop_image(image):
