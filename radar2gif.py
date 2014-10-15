@@ -198,7 +198,7 @@ def tweet_gif(region, size=(450, 585), remove_frame=0):
 
         if bot:
             twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-            tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #nhwx #njwx" % (
+            tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast" % (
                 region.title(), time)
             photo = open(gif, 'rb')
             twitter.update_status_with_media(status=tweet, media=photo)

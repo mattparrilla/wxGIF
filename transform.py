@@ -103,7 +103,7 @@ def add_basemap(radar, timestamp, region="northeast"):
     foreground = add_timestamp(radar, timestamp)
     combined = "gif/basemap/%s-bm-%s.png" % (
         basemap.split('/')[-1].split('.')[0],
-        timestamp)
+        timestamp.replace(':', ''))
 
     background.paste(foreground, (0, 0), foreground)
     background.convert("P").save(combined, "PNG", optimize=True)
