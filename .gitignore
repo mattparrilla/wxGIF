@@ -9,6 +9,7 @@ trash
 app/static/img/thumbnails
 .sass-cache
 gif/frames/*.PNG
+gif/basemap/*.png
 *.gfw
 northeast_201*
 

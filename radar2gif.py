@@ -109,7 +109,7 @@ def download_radar_images(region):
     return images
 
 
-def make_gif(region):
+def make_gif(region, dimensions):
     images = download_radar_images(region)
 
     print "\nChanging radar projection"
@@ -119,8 +119,11 @@ def make_gif(region):
     image_list = [change_palette(im) for im in new_projections]
     print "Done"
 
+    print "\nResize Image"
+    thumbnails = [resize_image(image, dimensions) for image in image_list]
+
     print "\nAdding basemap"
-    frames = [add_basemap(image) for image in image_list]
+    frames = [add_basemap(image, idx) for idx, image in enumerate(thumbnails)]
     print "Done"
 
     print "\nCropping image"
@@ -130,18 +133,11 @@ def make_gif(region):
     print "\nConvert image format"
     cropped_frames = [Image.open(im) for im in cropped]
 
-    print "\nScaling down for Twitter"
-    size = (450, 450)
-    cropped_thumbnails = [resize_image(image, size) for image in cropped]
-
     print "\nMaking GIF"
     filename = '%s/%s.gif' % (SAVE_TO_DIR, region)
     writeGif(filename, cropped_frames, duration=0.1)
 
-    thumbnail_f = '%s/%s-twitter.gif' % (SAVE_TO_DIR, region)
-    writeGif(thumbnail_f, cropped_thumbnails, duration=0.12)
-
-    return thumbnail_f, cropped_thumbnails
+    return filename, cropped_frames
 
 
 def resize_gif(region, frames, idx):
@@ -181,14 +177,14 @@ def obtain_auth_url():
             + "'\nOAUTH_TOKEN_SECRET = '" + authorized['oauth_token_secret'] + "'")
 
 
-def tweet_gif(region, size=450, remove_frame=0):
+def tweet_gif(region, size=(450, 585), remove_frame=0):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     current_hour = arrow.now(region_to_tz[region]).hour
 
     # if running manually or at appointed hour
     if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
-        gif, frames = make_gif(region)
+        gif, frames = make_gif(region, size)
         while os.path.getsize(gif) > 3000000:
             print "Resize Necessary: %s" % os.path.getsize(gif)
             remove_frame += 1
@@ -230,3 +226,4 @@ def get_map_bounds(region_name):
         bottom_right_coords[0], top_left_coords[1])
 
 tweet_gif('northeast')
+#get_map_bounds('northeast')
