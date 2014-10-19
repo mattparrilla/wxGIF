@@ -2,6 +2,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 import os
+import arrow
 
 nws_colors = [(152, 84, 198, 255),
     (248, 0, 253, 255),
@@ -113,7 +114,11 @@ def add_basemap(radar, timestamp, region="northeast"):
 
 def get_timestamp(filename):
     time = filename.split('/')[-1].split('_')[2]
-    timestamp = time[:2] + ":" + time[2:]
+    utc_offset = arrow.now().utcoffset()
+    delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
+    hour = str(int(time[:2]) + delta_t)
+    minutes = time[2:]
+    timestamp = hour + ':' + minutes
     return timestamp
 
 
