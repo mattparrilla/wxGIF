@@ -114,7 +114,7 @@ def add_basemap(radar, timestamp, region="northeast"):
 
 def get_timestamp(filename):
     time = filename.split('/')[-1].split('_')[2]
-    utc_offset = arrow.now().utcoffset()
+    utc_offset = arrow.now('US/Eastern').utcoffset()
     delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
     hour = str(int(time[:2]) + delta_t)
     minutes = time[2:]
