@@ -3,7 +3,7 @@ import requests
 import shutil
 import pytz
 import os
-import socket
+import sys
 import arrow
 from PIL import Image
 from datetime import datetime, timedelta
@@ -13,7 +13,7 @@ from twython import Twython
 from transform import (change_palette, change_projection, add_basemap,
     resize_image, crop_image, get_timestamp)
 
-if socket.gethostname() == 'm' or 'matt' in socket.gethostname():
+if len(sys.argv) > 1:
     SAVE_TO_DIR = 'gif'
     bot = False
 
