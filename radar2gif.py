@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from twython import Twython
+from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 from transform import (change_palette, change_projection, add_basemap,
     resize_image, crop_image, get_timestamp)
 
@@ -17,21 +18,13 @@ if len(sys.argv) > 1:
     SAVE_TO_DIR = 'gif'
     bot = False
 
-    # to tweet directly from command line, uncomment out below line
-    # and create config file based on _config.py, filling in appropriate
-    # twitter data
-
-    # from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 else:
-    APP_KEY = os.environ['APP_KEY']
-    APP_SECRET = os.environ['APP_SECRET']
-    OAUTH_TOKEN = os.environ['OAUTH_TOKEN']
-    OAUTH_TOKEN_SECRET = os.environ['OAUTH_TOKEN_SECRET']
-    SAVE_TO_DIR = '/tmp'
     bot = True
 
-region_to_tz = {'northeast': 'US/Eastern'}
+
 BASE_URL = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
+region_to_tz = {'northeast': 'US/Eastern',
+    'pacnorthwest': 'US/Pacific'}
 
 
 def get_all_radar_urls():
@@ -230,4 +223,3 @@ def get_map_bounds(region_name):
         bottom_right_coords[0], top_left_coords[1])
 
 tweet_gif('northeast')
-#get_map_bounds('northeast')
