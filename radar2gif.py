@@ -4,7 +4,6 @@ import shutil
 import pytz
 import os
 import sys
-import arrow
 from PIL import Image
 from datetime import datetime, timedelta
 from libs.images2gif import writeGif
@@ -177,26 +176,23 @@ def obtain_auth_url():
 def tweet_gif(region, size=(450, 585), remove_frame=0):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
-    current_hour = arrow.now(region_to_tz[region]).hour
-
     # if running manually or at appointed hour
-    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
-        gif, frames = make_gif(region, size)
-        while os.path.getsize(gif) > 3000000:
-            print "Resize Necessary: %s" % os.path.getsize(gif)
-            remove_frame += 1
-            gif = resize_gif(region, frames, remove_frame)
+    gif, frames = make_gif(region, size)
+    while os.path.getsize(gif) > 3000000:
+        print "Resize Necessary: %s" % os.path.getsize(gif)
+        remove_frame += 1
+        gif = resize_gif(region, frames, remove_frame)
 
-        time = last_updated_radar(get_region(region)[-1])
+    time = last_updated_radar(get_region(region)[-1])
 
-        if bot:
-            twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-            tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast" % (
-                region.title(), time)
-            photo = open(gif, 'rb')
-            twitter.update_status_with_media(status=tweet, media=photo)
-            print tweet
-            print "Tweet sent at: " + datetime.now().strftime("%H:%M")
+    if bot:
+        twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+        tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast" % (
+            region.title(), time)
+        photo = open(gif, 'rb')
+        twitter.update_status_with_media(status=tweet, media=photo)
+        print tweet
+        print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
 
 def get_map_bounds(region_name):
