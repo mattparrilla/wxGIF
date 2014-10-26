@@ -15,13 +15,13 @@ from transform import (change_palette, change_projection, add_basemap,
     resize_image, crop_image, get_timestamp)
 
 if len(sys.argv) > 1:
-    SAVE_TO_DIR = 'gif'
     bot = False
 
 else:
     bot = True
 
 
+SAVE_TO_DIR = 'gif'
 BASE_URL = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
 region_to_tz = {'northeast': 'US/Eastern',
     'pacnorthwest': 'US/Pacific'}
