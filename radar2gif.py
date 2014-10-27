@@ -3,35 +3,27 @@ import requests
 import shutil
 import pytz
 import os
-import socket
-import arrow
+import sys
 from PIL import Image
 from datetime import datetime, timedelta
 from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from twython import Twython
+from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 from transform import (change_palette, change_projection, add_basemap,
     resize_image, crop_image, get_timestamp)
 
-if socket.gethostname() == 'm' or 'matt' in socket.gethostname():
-    SAVE_TO_DIR = 'gif'
+if len(sys.argv) > 1:
     bot = False
 
-    # to tweet directly from command line, uncomment out below line
-    # and create config file based on _config.py, filling in appropriate
-    # twitter data
-
-    # from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
 else:
-    APP_KEY = os.environ['APP_KEY']
-    APP_SECRET = os.environ['APP_SECRET']
-    OAUTH_TOKEN = os.environ['OAUTH_TOKEN']
-    OAUTH_TOKEN_SECRET = os.environ['OAUTH_TOKEN_SECRET']
-    SAVE_TO_DIR = '/tmp'
     bot = True
 
-region_to_tz = {'northeast': 'US/Eastern'}
+
+SAVE_TO_DIR = 'gif'
 BASE_URL = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
+region_to_tz = {'northeast': 'US/Eastern',
+    'pacnorthwest': 'US/Pacific'}
 
 
 def get_all_radar_urls():
@@ -184,26 +176,23 @@ def obtain_auth_url():
 def tweet_gif(region, size=(450, 585), remove_frame=0):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
-    current_hour = arrow.now(region_to_tz[region]).hour
-
     # if running manually or at appointed hour
-    if not bot or current_hour in [0, 3, 6, 9, 12, 15, 18, 21]:
-        gif, frames = make_gif(region, size)
-        while os.path.getsize(gif) > 3000000:
-            print "Resize Necessary: %s" % os.path.getsize(gif)
-            remove_frame += 1
-            gif = resize_gif(region, frames, remove_frame)
+    gif, frames = make_gif(region, size)
+    while os.path.getsize(gif) > 3000000:
+        print "Resize Necessary: %s" % os.path.getsize(gif)
+        remove_frame += 1
+        gif = resize_gif(region, frames, remove_frame)
 
-        time = last_updated_radar(get_region(region)[-1])
+    time = last_updated_radar(get_region(region)[-1])
 
-        if bot:
-            twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-            tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast" % (
-                region.title(), time)
-            photo = open(gif, 'rb')
-            twitter.update_status_with_media(status=tweet, media=photo)
-            print tweet
-            print "Tweet sent at: " + datetime.now().strftime("%H:%M")
+    if bot:
+        twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+        tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast" % (
+            region.title(), time)
+        photo = open(gif, 'rb')
+        twitter.update_status_with_media(status=tweet, media=photo)
+        print tweet
+        print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
 
 def get_map_bounds(region_name):
@@ -230,4 +219,3 @@ def get_map_bounds(region_name):
         bottom_right_coords[0], top_left_coords[1])
 
 tweet_gif('pacnorthwest')
-#get_map_bounds('pacnorthwest')
