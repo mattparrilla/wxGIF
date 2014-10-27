@@ -229,5 +229,5 @@ def get_map_bounds(region_name):
     print "%f,%f,%f,%f" % (top_left_coords[0], bottom_right_coords[1],
         bottom_right_coords[0], top_left_coords[1])
 
-tweet_gif('northeast')
-#get_map_bounds('northeast')
+tweet_gif('pacnorthwest')
+#get_map_bounds('pacnorthwest')
