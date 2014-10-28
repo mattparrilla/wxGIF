@@ -39,7 +39,7 @@ timezone = {
 }
 
 tz = {
-    'northeastern': 'ET',
+    'northeast': 'ET',
     'pacnorthwest': 'PT',
     'centgrtlakes': 'CT',
     'northernrockies': 'MT',
@@ -53,7 +53,7 @@ tz = {
 }
 
 hashtags = {
-    'northeastern': '#vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast',
+    'northeast': '#vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast',
     'pacnorthwest': '#wawx #orwx #cawx #nvwx #idwx',
     'centgrtlakes': '#wxGIF',
     'northernrockies': '#wxGIF',
