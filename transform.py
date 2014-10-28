@@ -109,7 +109,10 @@ def get_timestamp(filename, zone):
     time = filename.split('/')[-1].split('_')[2]
     utc_offset = arrow.now(zone).utcoffset()
     delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
-    hour = str(int(time[:2]) + delta_t)
+    hour = int(time[:2]) + delta_t
+    if hour < 0:
+        hour += 24
+    hour = str(hour)
     minutes = time[2:]
     timestamp = hour + ':' + minutes
     return timestamp
@@ -133,12 +136,17 @@ def basemap_text(image, region):
     """Adds branding to image"""
     draw = ImageDraw.Draw(image)
     w, h = image.size
-    x_pos = w - 220
-    y_pos = h - 100
     font = ImageFont.truetype('fonts/raleway.otf', 55)
     small_font = ImageFont.truetype('fonts/raleway.otf', 18)
 
-    if region == 'northeast':
+    if region in ['southeast', 'southplains', 'pacsouthwest']:
+        x_pos = 20  # move branding to left side
+    else:
+        x_pos = w - 220
+
+    y_pos = h - 100
+
+    if region in ['northeast', 'southeast', 'southmissvly', 'pacsouthwest']:
         color = (255, 255, 255)
     else:
         color = (100, 100, 100)
@@ -148,10 +156,15 @@ def basemap_text(image, region):
     return image
 
 
-def crop_image(image):
+def crop_image(image, region):
     cropped = Image.open(image)
     w, h = cropped.size
-    cropped.crop((0, 40, w, h)).save(image, "PNG", optimize=True)
+    x, y = 0
+    if region == 'northeast':
+        x = 40
+    elif region == 'southrockies':
+        h = h - 100
+    cropped.crop((x, y, w, h)).save(image, "PNG", optimize=True)
     return image
 
 

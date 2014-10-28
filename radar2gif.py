@@ -18,7 +18,7 @@ if len(sys.argv) > 1:
     region = sys.argv[1]
 else:
     bot = False
-    region = 'pacnorthwest'
+    region = 'Conus'
 
 
 SAVE_TO_DIR = 'gif'
@@ -28,7 +28,7 @@ timezone = {
     'northeast': 'US/Eastern',
     'pacnorthwest': 'US/Pacific',
     'centgrtlakes': 'US/Central',
-    'northernrockies': 'US/Mountain',
+    'northrockies': 'US/Mountain',
     'pacsouthwest': 'US/Pacific',
     'southeast': 'US/Eastern',
     'southmissvly': 'US/Central',
@@ -38,11 +38,26 @@ timezone = {
     'Conus': 'US/Eastern'
 }
 
+region_name = {
+    'northeast': 'Northeast',
+    'pacnorthwest': 'Northwest',
+    'centgrtlakes': 'Central Great Lakes',
+    'northrockies': 'Northern Rockies',
+    'pacsouthwest': 'Pacific SW',
+    'southeast': 'Southeast',
+    'southmissvly': 'Southern Mississippi Valley',
+    'southplains': 'Southern Plains',
+    'southrockies': 'Southern Rockies',
+    'uppermissvly': 'Upper Mississippi Valley',
+    'Conus': 'Continental United States'
+}
+
+
 tz = {
     'northeast': 'ET',
     'pacnorthwest': 'PT',
     'centgrtlakes': 'CT',
-    'northernrockies': 'MT',
+    'northrockies': 'MT',
     'pacsouthwest': 'PT',
     'southeast': 'ET',
     'southmissvly': 'CT',
@@ -55,15 +70,15 @@ tz = {
 hashtags = {
     'northeast': '#vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast',
     'pacnorthwest': '#wawx #orwx #cawx #nvwx #idwx',
-    'centgrtlakes': '#wxGIF',
-    'northernrockies': '#wxGIF',
-    'pacsouthwest': '#wxGIF',
-    'southeast': '#wxGIF',
-    'southmissvly': '#wxGIF',
-    'southplains': '#wxGIF',
-    'southrockies': '#wxGIF',
-    'uppermissvly': '#wxGIF',
-    'Conus': '#wxGIF'
+    'centgrtlakes': '#wiwx #miwx #ilwx #inwx #ohwx #kywx #tnwx',
+    'northrockies': '#mtwx #wywx #utwx #cowx',
+    'pacsouthwest': '#cawx #nvwx',
+    'southeast': '#ncwx #scwx #gawx #flwx',
+    'southmissvly': '#lawx #arwx #miwx #alwx',
+    'southplains': '#txwx #okwx',
+    'southrockies': '#azwx #nmwx',
+    'uppermissvly': '#ndwx #sdwx #mnwx #newx #iawx #kswx #mowx',
+    'Conus': '#uswx #wxGIF'
 }
 
 
@@ -169,7 +184,7 @@ def make_gif(region, dimensions):
         image in enumerate(thumbnails)]
     print "Done"
 
-    if region == 'northeast':
+    if region == 'northeast' or region == 'southrockies':
         print "\nCropping image"
         frames = [crop_image(image) for image in frames]
         print "Done"
@@ -217,14 +232,14 @@ def tweet_gif(region, size=(450, 585), remove_frame=0):
             twitter_keys[region]['OAUTH_TOKEN'],
             twitter_keys[region]['OAUTH_TOKEN_SECRET'])
         tweet = "Radar over the %s. Most recent image from %s %s %s" % (
-            region.title(), time, tz[region], hashtags[region])
+            region_name[region], time, tz[region], hashtags[region])
         photo = open(gif, 'rb')
         twitter.update_status_with_media(status=tweet, media=photo)
         print tweet
         print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
 
-def get_map_bounds(region, dimensions):
+def get_map_bounds(region, dimensions=(840, 800)):
     base_url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
     radar_urls = get_all_radar_urls()
     for href in radar_urls:
@@ -250,3 +265,4 @@ def get_map_bounds(region, dimensions):
         bottom_right_coords[0], top_left_coords[1])
 
 tweet_gif(region)
+#get_map_bounds(region)
