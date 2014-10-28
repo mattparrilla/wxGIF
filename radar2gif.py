@@ -9,21 +9,33 @@ from datetime import datetime, timedelta
 from libs.images2gif import writeGif
 from bs4 import BeautifulSoup as Soup
 from twython import Twython
-from config import APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
+from config import APP_KEY, APP_SECRET, twitter_keys
 from transform import (change_palette, change_projection, add_basemap,
     resize_image, crop_image, get_timestamp)
 
 if len(sys.argv) > 1:
-    bot = False
-
-else:
     bot = True
+    region = sys.argv[1]
+else:
+    bot = False
+    region = 'pacnorthwest'
 
 
 SAVE_TO_DIR = 'gif'
 BASE_URL = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-region_to_tz = {'northeast': 'US/Eastern',
+
+timezone = {'northeast': 'US/Eastern',
     'pacnorthwest': 'US/Pacific'}
+
+tz = {
+    'northeastern': 'ET',
+    'pacnorthwest': 'PT'
+}
+
+hashtags = {
+    'northeastern': '#vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast',
+    'pacnorthwest': '#wawx #orwx #cawx #nvwx #idwx'
+}
 
 
 def get_all_radar_urls():
@@ -82,7 +94,13 @@ def download_radar_images(region):
     print "Downloading radar images and world file"
     image_urls = get_region(region)
     images = []
-    wf_url = "%s/%s_radaronly.gfw" % (BASE_URL, region)
+
+    if region == 'Conus':
+        gfw = 'latest'
+    else:
+        gfw = region
+
+    wf_url = "%s/%s_radaronly.gfw" % (BASE_URL, gfw)
     wf = requests.get(wf_url)
     for src in image_urls:
         print "Downloading: %s" % src
@@ -112,22 +130,23 @@ def make_gif(region, dimensions):
     print "Done"
 
     print "\nGet timestamps"
-    timestamps = [get_timestamp(image) for image in image_list]
+    timestamps = [get_timestamp(image, timezone[region]) for image in image_list]
 
     print "\nResize Image"
     thumbnails = [resize_image(image, dimensions) for image in image_list]
 
     print "\nAdding basemap"
-    frames = [add_basemap(image, timestamps[idx]) for idx,
+    frames = [add_basemap(image, timestamps[idx], region) for idx,
         image in enumerate(thumbnails)]
     print "Done"
 
-    print "\nCropping image"
-    cropped = [crop_image(image) for image in frames]
-    print "Done"
+    if region == 'northeast':
+        print "\nCropping image"
+        frames = [crop_image(image) for image in frames]
+        print "Done"
 
     print "\nConvert image format"
-    cropped_frames = [Image.open(im) for im in cropped]
+    cropped_frames = [Image.open(im) for im in frames]
 
     print "\nMaking GIF"
     filename = '%s/%s.gif' % (SAVE_TO_DIR, region)
@@ -143,34 +162,13 @@ def resize_gif(region, frames, idx):
     return thumbnail_f
 
 
-def last_updated_radar(url):
+def last_updated_radar(url, region):
     time_of_radar = url.split('/')[-1].split('.')[0].split('_')[-2]
     radar_datetime = (datetime.strptime(time_of_radar, "%H%M") +
         timedelta(days=365))
-    time_in_est = radar_datetime + diff_from_utc('US/Eastern')
+    time_in_est = radar_datetime + diff_from_utc(timezone[region])
     last_radar_time = time_in_est.strftime("%I:%M").lstrip("0")
     return last_radar_time
-
-
-def obtain_auth_url():
-    """Used to app to tweet to my account
-    NOT CALLED ANYWHERE"""
-    twitter = Twython(APP_KEY, APP_SECRET)
-    auth = twitter.get_authentication_tokens()
-
-    oauth_token = auth['oauth_token']
-    oauth_token_secret = auth['oauth_token_secret']
-    print "\n\n\nGo to the following URL to authorize app:"
-    print auth['auth_url']
-    oauth_verifier = raw_input("\nEnter the pin: ")
-
-    twitter = Twython(APP_KEY, APP_SECRET, oauth_token, oauth_token_secret)
-    authorized = twitter.get_authorized_tokens(oauth_verifier)
-
-    #write confirmed tokens to disk
-    with open("config.py", "a") as config_file:
-        config_file.write("\nOAUTH_TOKEN = '" + authorized['oauth_token']
-            + "'\nOAUTH_TOKEN_SECRET = '" + authorized['oauth_token_secret'] + "'")
 
 
 def tweet_gif(region, size=(450, 585), remove_frame=0):
@@ -183,34 +181,38 @@ def tweet_gif(region, size=(450, 585), remove_frame=0):
         remove_frame += 1
         gif = resize_gif(region, frames, remove_frame)
 
-    time = last_updated_radar(get_region(region)[-1])
+    time = last_updated_radar(get_region(region)[-1], region)
 
     if bot:
-        twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-        tweet = "Radar over the %s. Most recent image from %s ET #vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast" % (
-            region.title(), time)
+        twitter = Twython(APP_KEY, APP_SECRET,
+            twitter_keys[region]['OAUTH_TOKEN'],
+            twitter_keys[region]['OAUTH_TOKEN_SECRET'])
+        tweet = "Radar over the %s. Most recent image from %s %s %s" % (
+            region.title(), time, tz[region], hashtags[region])
         photo = open(gif, 'rb')
         twitter.update_status_with_media(status=tweet, media=photo)
         print tweet
         print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
 
-def get_map_bounds(region_name):
+def get_map_bounds(region, dimensions):
     base_url = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-    map_dimensions = (840, 800)
     radar_urls = get_all_radar_urls()
     for href in radar_urls:
-        if region_name in href and ".gfw" in href:
+        if region in href and ".gfw" in href:
             gfw = href
 
     r = requests.get(base_url + gfw)
     gfw = r.text.replace('\r', '').split('\n')
     for i, x in enumerate(gfw):
-        gfw[i] = float(x)
+        try:
+            gfw[i] = float(x)
+        except ValueError:
+            pass
 
     top_left_coords = (gfw[4], gfw[5])
-    bottom_right_coords = ((gfw[4] + map_dimensions[0] * gfw[0]),
-        (gfw[5] + map_dimensions[1] * gfw[3]))
+    bottom_right_coords = ((gfw[4] + dimensions[0] * gfw[0]),
+        (gfw[5] + dimensions[1] * gfw[3]))
 
     print "The bounding coordinates are (%f, %f) and (%f, %f)" % (
         top_left_coords[0], top_left_coords[1], bottom_right_coords[0],
@@ -218,4 +220,4 @@ def get_map_bounds(region_name):
     print "%f,%f,%f,%f" % (top_left_coords[0], bottom_right_coords[1],
         bottom_right_coords[0], top_left_coords[1])
 
-tweet_gif('pacnorthwest')
+tweet_gif(region)

@@ -43,13 +43,6 @@ new_colors = [(0, 0, 0, 255),
     (50, 136, 189, 255),
     (94, 79, 162, 255),
     # Below colors are mostly white
-    #(104, 79, 162, 150),
-    #(114, 79, 162, 120),
-    #(124, 79, 162, 90),
-    #(134, 79, 162, 80),
-    #(144, 79, 162, 70),
-    #(144, 79, 162, 60),
-    #(154, 79, 162, 0),
     (150, 150, 150, 150),
     (150, 150, 150, 130),
     (150, 150, 150, 110),
@@ -85,23 +78,23 @@ def resize_image(image, dimensions):
     return im
 
 
-def change_basemap(filename="basemap/northeast-outline.png"):
-    im = Image.open(filename)
-    pixels = im.load()
-    print pixels[0, 1]
-    for i in range(im.size[0]):
-        for j in range(im.size[1]):
-            if pixels[i, j] == (134, 134, 134, 127):
-                pixels[i, j] = (255, 255, 255, 0)
+#def change_basemap(filename="basemap/northeast-outline.png"):
+#    im = Image.open(filename)
+#    pixels = im.load()
+#    print pixels[0, 1]
+#    for i in range(im.size[0]):
+#        for j in range(im.size[1]):
+#            if pixels[i, j] == (134, 134, 134, 127):
+#                pixels[i, j] = (255, 255, 255, 0)
+#
+#    filename = "basemap/test.PNG"
+#    im.save(filename, "PNG", dpi=[100, 100])
 
-    filename = "basemap/test.PNG"
-    im.save(filename, "PNG", dpi=[100, 100])
 
-
-def add_basemap(radar, timestamp, region="northeast"):
+def add_basemap(radar, timestamp, region):
     basemap = "basemap/%s.png" % region
-    background = basemap_text(Image.open(basemap))
-    foreground = add_timestamp(radar, timestamp)
+    background = basemap_text(Image.open(basemap), region)
+    foreground = add_timestamp(radar, timestamp, region)
     combined = "gif/basemap/%s-bm-%s.png" % (
         basemap.split('/')[-1].split('.')[0],
         timestamp.replace(':', ''))
@@ -112,9 +105,9 @@ def add_basemap(radar, timestamp, region="northeast"):
     return combined
 
 
-def get_timestamp(filename):
+def get_timestamp(filename, zone):
     time = filename.split('/')[-1].split('_')[2]
-    utc_offset = arrow.now('US/Eastern').utcoffset()
+    utc_offset = arrow.now(zone).utcoffset()
     delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
     hour = str(int(time[:2]) + delta_t)
     minutes = time[2:]
@@ -122,18 +115,21 @@ def get_timestamp(filename):
     return timestamp
 
 
-def add_timestamp(image, timestamp):
+def add_timestamp(image, timestamp, region):
     draw = ImageDraw.Draw(image)
     w, h = image.size
     x_pos = 10
-    y_pos = 40
+    if region == 'northeast':
+        y_pos = 40
+    else:
+        y_pos = 10
     font = ImageFont.truetype('fonts/rokkitt.otf', 22)
 
     draw.text((x_pos, y_pos), timestamp, (100, 100, 100), font=font)
     return image
 
 
-def basemap_text(image):
+def basemap_text(image, region):
     """Adds branding to image"""
     draw = ImageDraw.Draw(image)
     w, h = image.size
@@ -142,8 +138,13 @@ def basemap_text(image):
     font = ImageFont.truetype('fonts/raleway.otf', 55)
     small_font = ImageFont.truetype('fonts/raleway.otf', 18)
 
-    draw.text((x_pos, y_pos), "@wxGIF", (255, 255, 255), font=font)
-    draw.text((x_pos + 5, y_pos + 62), "Radar, made for Twitter", font=small_font)
+    if region == 'northeast':
+        color = (255, 255, 255)
+    else:
+        color = (100, 100, 100)
+
+    draw.text((x_pos, y_pos), "@wxGIF", color, font=font)
+    draw.text((x_pos + 5, y_pos + 62), "Radar, made for Twitter", color, font=small_font)
     return image
 
 
