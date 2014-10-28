@@ -24,17 +24,46 @@ else:
 SAVE_TO_DIR = 'gif'
 BASE_URL = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
 
-timezone = {'northeast': 'US/Eastern',
-    'pacnorthwest': 'US/Pacific'}
+timezone = {
+    'northeast': 'US/Eastern',
+    'pacnorthwest': 'US/Pacific',
+    'centgrtlakes': 'US/Central',
+    'northernrockies': 'US/Mountain',
+    'pacsouthwest': 'US/Pacific',
+    'southeast': 'US/Eastern',
+    'southmissvly': 'US/Central',
+    'southplains': 'US/Central',
+    'southrockies': 'US/Mountain',
+    'uppermissvly': 'US/Central',
+    'Conus': 'US/Eastern'
+}
 
 tz = {
     'northeastern': 'ET',
-    'pacnorthwest': 'PT'
+    'pacnorthwest': 'PT',
+    'centgrtlakes': 'CT',
+    'northernrockies': 'MT',
+    'pacsouthwest': 'PT',
+    'southeast': 'ET',
+    'southmissvly': 'CT',
+    'southplains': 'CT',
+    'southrockies': 'MT',
+    'uppermissvly': 'CT',
+    'Conus': 'ET'
 }
 
 hashtags = {
     'northeastern': '#vtwx #nywx #mewx #ctwx #mawx #pawx #nhwx #njwx #skitheeast',
-    'pacnorthwest': '#wawx #orwx #cawx #nvwx #idwx'
+    'pacnorthwest': '#wawx #orwx #cawx #nvwx #idwx',
+    'centgrtlakes': '#wxGIF',
+    'northernrockies': '#wxGIF',
+    'pacsouthwest': '#wxGIF',
+    'southeast': '#wxGIF',
+    'southmissvly': '#wxGIF',
+    'southplains': '#wxGIF',
+    'southrockies': '#wxGIF',
+    'uppermissvly': '#wxGIF',
+    'Conus': '#wxGIF'
 }
 
 
