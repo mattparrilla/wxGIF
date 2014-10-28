@@ -22,8 +22,6 @@ else:
 
 SAVE_TO_DIR = 'gif'
 BASE_URL = 'http://radar.weather.gov/ridge/Conus/RadarImg/'
-region_to_tz = {'northeast': 'US/Eastern',
-    'pacnorthwest': 'US/Pacific'}
 
 
 def get_all_radar_urls():
@@ -112,13 +110,13 @@ def make_gif(region, dimensions):
     print "Done"
 
     print "\nGet timestamps"
-    timestamps = [get_timestamp(image) for image in image_list]
+    timestamps = [get_timestamp(image, region) for image in image_list]
 
     print "\nResize Image"
     thumbnails = [resize_image(image, dimensions) for image in image_list]
 
     print "\nAdding basemap"
-    frames = [add_basemap(image, timestamps[idx]) for idx,
+    frames = [add_basemap(image, timestamps[idx], region) for idx,
         image in enumerate(thumbnails)]
     print "Done"
 
@@ -137,8 +135,8 @@ def make_gif(region, dimensions):
 
 
 def resize_gif(region, frames, idx):
-    thumbnail_f = '%s/%s-twitter.gif' % (SAVE_TO_DIR, region)
-    writeGif(thumbnail_f, frames[idx:], duration=0.12)
+    thumbnail_f = '%s/%s.gif' % (SAVE_TO_DIR, region)
+    writeGif(thumbnail_f, frames[idx:], duration=0.125)
 
     return thumbnail_f
 
@@ -218,4 +216,4 @@ def get_map_bounds(region_name):
     print "%f,%f,%f,%f" % (top_left_coords[0], bottom_right_coords[1],
         bottom_right_coords[0], top_left_coords[1])
 
-tweet_gif('northeast')
+tweet_gif('northrockies')

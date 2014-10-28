@@ -59,6 +59,10 @@ new_colors = [(0, 0, 0, 255),
     (150, 150, 150, 30),
     (255, 255, 255, 0)]
 
+region_to_tz = {'northeast': 'US/Eastern',
+    'pacnorthwest': 'US/Pacific',
+    'northrockies': 'US/Mountain'}
+
 
 def change_palette(image):
     """Takes a list of dicts of images {'name': name, 'image': PIL.Image}
@@ -85,7 +89,8 @@ def resize_image(image, dimensions):
     return im
 
 
-def change_basemap(filename="basemap/northeast-outline.png"):
+def change_basemap(region):
+    filename = "basemap/%s-outline.png" % region
     im = Image.open(filename)
     pixels = im.load()
     print pixels[0, 1]
@@ -98,7 +103,7 @@ def change_basemap(filename="basemap/northeast-outline.png"):
     im.save(filename, "PNG", dpi=[100, 100])
 
 
-def add_basemap(radar, timestamp, region="northeast"):
+def add_basemap(radar, timestamp, region):
     basemap = "basemap/%s.png" % region
     background = basemap_text(Image.open(basemap))
     foreground = add_timestamp(radar, timestamp)
@@ -112,9 +117,9 @@ def add_basemap(radar, timestamp, region="northeast"):
     return combined
 
 
-def get_timestamp(filename):
+def get_timestamp(filename, region):
     time = filename.split('/')[-1].split('_')[2]
-    utc_offset = arrow.now('US/Eastern').utcoffset()
+    utc_offset = arrow.now(region_to_tz[region]).utcoffset()
     delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
     hour = str(int(time[:2]) + delta_t)
     minutes = time[2:]
