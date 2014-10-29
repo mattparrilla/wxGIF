@@ -144,7 +144,10 @@ def basemap_text(image, region):
     else:
         x_pos = w - 220
 
-    y_pos = h - 100
+    if region in ['southrockies']:
+        y_pos = h - 200
+    else:
+        y_pos = h - 100
 
     if region in ['northeast', 'southeast', 'southmissvly', 'pacsouthwest']:
         color = (255, 255, 255)
@@ -159,9 +162,9 @@ def basemap_text(image, region):
 def crop_image(image, region):
     cropped = Image.open(image)
     w, h = cropped.size
-    x, y = 0
+    x, y = 0, 0
     if region == 'northeast':
-        x = 40
+        y = 40
     elif region == 'southrockies':
         h = h - 100
     cropped.crop((x, y, w, h)).save(image, "PNG", optimize=True)

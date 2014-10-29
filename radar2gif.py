@@ -186,7 +186,7 @@ def make_gif(region, dimensions):
 
     if region == 'northeast' or region == 'southrockies':
         print "\nCropping image"
-        frames = [crop_image(image) for image in frames]
+        frames = [crop_image(image, region) for image in frames]
         print "Done"
 
     print "\nConvert image format"
