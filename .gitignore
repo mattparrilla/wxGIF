@@ -11,6 +11,7 @@ app/static/img/thumbnails
 gif/*/*.PNG
 gif/*/*.png
 gif/*/*.gif
+
 *.gfw
 gif/*.gif
 northeast_201*
