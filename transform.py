@@ -122,13 +122,18 @@ def add_timestamp(image, timestamp, region):
     draw = ImageDraw.Draw(image)
     w, h = image.size
     x_pos = 10
+    color = (100, 100, 100)
     if region == 'northeast':
         y_pos = 40
+    elif region == 'Conus':
+        y_pos = h - 40
+        x_pos = 10
+        color = (50, 50, 50)
     else:
         y_pos = 10
-    font = ImageFont.truetype('fonts/rokkitt.otf', 22)
 
-    draw.text((x_pos, y_pos), timestamp, (100, 100, 100), font=font)
+    font = ImageFont.truetype('fonts/rokkitt.otf', 22)
+    draw.text((x_pos, y_pos), timestamp, color, font=font)
     return image
 
 
@@ -138,6 +143,12 @@ def basemap_text(image, region):
     w, h = image.size
     font = ImageFont.truetype('fonts/raleway.otf', 55)
     small_font = ImageFont.truetype('fonts/raleway.otf', 18)
+
+    if region == 'Conus':
+        draw.text((10, h - 23), "@wxGIF", (50, 50, 50), font=small_font)
+        draw.text((w - 210, h - 23), "Radar, made for Twitter",
+            (50, 50, 50), font=small_font)
+        return image
 
     if region in ['southeast', 'southplains', 'pacsouthwest']:
         x_pos = 20  # move branding to left side
@@ -150,7 +161,7 @@ def basemap_text(image, region):
         y_pos = h - 100
 
     if region in ['northeast', 'southeast', 'southmissvly', 'pacsouthwest']:
-        color = (255, 255, 255)
+        color = (250, 250, 250)
     else:
         color = (100, 100, 100)
 
