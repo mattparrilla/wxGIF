@@ -29,6 +29,7 @@ timezone = {
     'pacnorthwest': 'US/Pacific',
     'centgrtlakes': 'US/Central',
     'northrockies': 'US/Mountain',
+    'intermountainwest': 'US/Mountain',
     'pacsouthwest': 'US/Pacific',
     'southeast': 'US/Eastern',
     'southmissvly': 'US/Central',
@@ -43,6 +44,7 @@ region_name = {
     'pacnorthwest': 'Northwest',
     'centgrtlakes': 'Central Great Lakes',
     'northrockies': 'Northern Rockies',
+    'intermountainwest': 'Intermountain West',
     'pacsouthwest': 'Pacific SW',
     'southeast': 'Southeast',
     'southmissvly': 'Southern Mississippi Valley',
@@ -58,6 +60,7 @@ tz = {
     'pacnorthwest': 'PT',
     'centgrtlakes': 'CT',
     'northrockies': 'MT',
+    'intermountainwest': 'MT',
     'pacsouthwest': 'PT',
     'southeast': 'ET',
     'southmissvly': 'CT',
@@ -72,6 +75,7 @@ hashtags = {
     'pacnorthwest': '#wawx #orwx #cawx #nvwx #idwx',
     'centgrtlakes': '#wiwx #miwx #ilwx #inwx #ohwx #kywx #tnwx',
     'northrockies': '#mtwx #wywx #utwx #cowx',
+    'intermountainwest': '#idwx #utwx #cawx #nvwx #orwx',
     'pacsouthwest': '#cawx #nvwx',
     'southeast': '#ncwx #scwx #gawx #flwx',
     'southmissvly': '#lawx #arwx #miwx #alwx',
@@ -147,7 +151,6 @@ def download_radar_images(region):
     wf_url = "%s/%s_radaronly.gfw" % (BASE_URL, gfw)
     wf = requests.get(wf_url)
     for src in image_urls:
-        print "Downloading: %s" % src
         r = requests.get(src, stream=True)
         if r.status_code == 200:
             name = "gif/source/%s" % src.split('/')[-1]
@@ -159,11 +162,39 @@ def download_radar_images(region):
                 f.write(wf.text)
             images.append(name)
 
-    print "All images downloaded"
     return images
 
 
-def make_gif(region, dimensions):
+def make_custom_region(name, images, crop, width=450):
+    print 'getting timestamps'
+    timestamps = [get_timestamp(image, timezone[name]) for image in images]
+
+    print 'cropping'
+    cropped = [crop_image(image, crop, False)
+        for image in images]
+
+    ratio = (crop[2] - crop[1]) / width
+    height = (crop[3] - crop[1]) / ratio
+
+    print 'making thumbnails'
+    thumbnails = [resize_image(image, (width, height)) for image in cropped]
+
+    print 'adding basemap'
+    frames = [add_basemap(image, timestamps[idx], name) for idx, image
+        in enumerate(thumbnails)]
+
+    opened_images = [Image.open(im) for im in frames]
+
+    print 'creating GIF'
+    filename = '%s/%s.gif' % (SAVE_TO_DIR, name)
+    writeGif(filename, opened_images, duration=0.125)
+
+    if bot:
+        time = last_updated_radar(get_region(name)[-1], name)
+        tweet_gif(filename, opened_images, time, name)
+
+
+def make_gif(region, dimensions=(450, 585)):
     images = download_radar_images(region)
 
     print "\nChanging radar projection"
@@ -171,7 +202,10 @@ def make_gif(region, dimensions):
 
     print "\nChanging radar palette"
     image_list = [change_palette(im) for im in new_projections]
-    print "Done"
+
+    if region == 'Conus':
+        make_custom_region('intermountainwest', image_list,
+            (150, 340, 1050, 1060), 450)
 
     print "\nGet timestamps"
     timestamps = [get_timestamp(image, timezone[region]) for image in image_list]
@@ -182,12 +216,13 @@ def make_gif(region, dimensions):
     print "\nAdding basemap"
     frames = [add_basemap(image, timestamps[idx], region) for idx,
         image in enumerate(thumbnails)]
-    print "Done"
 
-    if region == 'northeast' or region == 'southrockies':
+    if region in ['northeast', 'southrockies']:
         print "\nCropping image"
-        frames = [crop_image(image, region) for image in frames]
-        print "Done"
+        if region == 'northeast':
+            frames = [crop_image(image, (0, 40, 0, 0)) for image in frames]
+        elif region == 'southrockies':
+            frames = [crop_image(image, (0, 0, 0, 100)) for image in frames]
 
     print "\nConvert image format"
     cropped_frames = [Image.open(im) for im in frames]
@@ -196,11 +231,13 @@ def make_gif(region, dimensions):
     filename = '%s/%s.gif' % (SAVE_TO_DIR, region)
     writeGif(filename, cropped_frames, duration=0.125)
 
-    return filename, cropped_frames
+    if bot:
+        time = last_updated_radar(get_region(region)[-1], region)
+        tweet_gif(filename, cropped_frames, time, region)
 
 
 def resize_gif(region, frames, idx):
-    thumbnail_f = '%s/%s-twitter.gif' % (SAVE_TO_DIR, region)
+    thumbnail_f = '%s/%s.gif' % (SAVE_TO_DIR, region)
     writeGif(thumbnail_f, frames[idx:], duration=0.12)
 
     return thumbnail_f
@@ -215,28 +252,23 @@ def last_updated_radar(url, region):
     return last_radar_time
 
 
-def tweet_gif(region, size=(450, 585), remove_frame=0):
+def tweet_gif(gif, frames, time, region, remove_frame=0):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
-    # if running manually or at appointed hour
-    gif, frames = make_gif(region, size)
     while os.path.getsize(gif) > 3000000:
         print "Resize Necessary: %s" % os.path.getsize(gif)
         remove_frame += 1
         gif = resize_gif(region, frames, remove_frame)
 
-    time = last_updated_radar(get_region(region)[-1], region)
-
-    if bot:
-        twitter = Twython(APP_KEY, APP_SECRET,
-            twitter_keys[region]['OAUTH_TOKEN'],
-            twitter_keys[region]['OAUTH_TOKEN_SECRET'])
-        tweet = "Radar over the %s. Most recent image from %s %s %s" % (
-            region_name[region], time, tz[region], hashtags[region])
-        photo = open(gif, 'rb')
-        twitter.update_status_with_media(status=tweet, media=photo)
-        print tweet
-        print "Tweet sent at: " + datetime.now().strftime("%H:%M")
+    twitter = Twython(APP_KEY, APP_SECRET,
+        twitter_keys[region]['OAUTH_TOKEN'],
+        twitter_keys[region]['OAUTH_TOKEN_SECRET'])
+    tweet = "Radar over the %s. Most recent image from %s %s %s" % (
+        region_name[region], time, tz[region], hashtags[region])
+    photo = open(gif, 'rb')
+    twitter.update_status_with_media(status=tweet, media=photo)
+    print tweet
+    print "Tweet sent at: " + datetime.now().strftime("%H:%M")
 
 
 def get_map_bounds(region, dimensions=(840, 800)):
@@ -264,5 +296,5 @@ def get_map_bounds(region, dimensions=(840, 800)):
     print "%f,%f,%f,%f" % (top_left_coords[0], bottom_right_coords[1],
         bottom_right_coords[0], top_left_coords[1])
 
-tweet_gif(region)
-#get_map_bounds(region)
+make_gif(region)
+#get_map_bounds('latest', (3400, 1600))
