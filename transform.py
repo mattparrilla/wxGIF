@@ -128,7 +128,7 @@ def add_timestamp(image, timestamp, region):
     elif region == 'Conus':
         y_pos = h - 40
         x_pos = 10
-        color = (50, 50, 50)
+        color = (80, 80, 80)
     else:
         y_pos = 10
 
@@ -145,9 +145,9 @@ def basemap_text(image, region):
     small_font = ImageFont.truetype('fonts/raleway.otf', 18)
 
     if region == 'Conus':
-        draw.text((10, h - 23), "@wxGIF", (50, 50, 50), font=small_font)
+        draw.text((10, h - 23), "@wxGIF", (80, 80, 80), font=small_font)
         draw.text((w - 210, h - 23), "Radar, made for Twitter",
-            (50, 50, 50), font=small_font)
+            (80, 80, 80), font=small_font)
         return image
 
     if region in ['southeast', 'southplains', 'pacsouthwest']:
@@ -170,15 +170,15 @@ def basemap_text(image, region):
     return image
 
 
-def crop_image(image, region):
+def crop_image(image, dimensions, from_bottom=True):
     cropped = Image.open(image)
     w, h = cropped.size
-    x, y = 0, 0
-    if region == 'northeast':
-        y = 40
-    elif region == 'southrockies':
-        h = h - 100
-    cropped.crop((x, y, w, h)).save(image, "PNG", optimize=True)
+    if from_bottom:
+        cropped.crop((dimensions[0], dimensions[1], w - dimensions[2],
+            h - dimensions[3])).save(image, "PNG", optimize=True)
+    else:
+        cropped.crop((dimensions[0], dimensions[1], dimensions[2],
+            dimensions[3])).save(image, "PNG", optimize=True)
     return image
 
 
