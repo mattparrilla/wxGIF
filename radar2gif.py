@@ -190,7 +190,7 @@ def make_custom_region(name, images, crop, width=450):
     writeGif(filename, opened_images, duration=0.125)
 
     if bot:
-        time = last_updated_radar(get_region(name)[-1], name)
+        time = last_updated_radar(get_region('Conus')[-1], name)
         tweet_gif(filename, opened_images, time, name)
 
 
