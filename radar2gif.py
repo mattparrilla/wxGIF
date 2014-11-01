@@ -238,11 +238,7 @@ def make_gif(region, dimensions=(450, 585)):
 
 def resize_gif(region, frames, idx):
     thumbnail_f = '%s/%s.gif' % (SAVE_TO_DIR, region)
-<<<<<<< HEAD
     writeGif(thumbnail_f, frames[idx:], duration=0.125)
-=======
-    writeGif(thumbnail_f, frames[idx:], duration=0.12)
->>>>>>> 9ea8ccca0edf6b8f5311444a79059d10eeb3dc3b
 
     return thumbnail_f
 
