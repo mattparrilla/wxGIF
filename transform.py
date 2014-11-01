@@ -113,7 +113,10 @@ def get_timestamp(filename, zone):
     time = filename.split('/')[-1].split('_')[2]
     utc_offset = arrow.now(zone).utcoffset()
     delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
-    hour = str(int(time[:2]) + delta_t)
+    hour = int(time[:2]) + delta_t
+    if hour < 0:
+        hour += 24
+    hour = str(hour)
     minutes = time[2:]
     timestamp = hour + ':' + minutes
     return timestamp
@@ -123,13 +126,18 @@ def add_timestamp(image, timestamp, region):
     draw = ImageDraw.Draw(image)
     w, h = image.size
     x_pos = 10
+    color = (100, 100, 100)
     if region == 'northeast':
         y_pos = 40
+    elif region == 'Conus':
+        y_pos = h - 40
+        x_pos = 10
+        color = (80, 80, 80)
     else:
         y_pos = 10
-    font = ImageFont.truetype('fonts/rokkitt.otf', 22)
 
-    draw.text((x_pos, y_pos), timestamp, (100, 100, 100), font=font)
+    font = ImageFont.truetype('fonts/rokkitt.otf', 22)
+    draw.text((x_pos, y_pos), timestamp, color, font=font)
     return image
 
 
@@ -137,13 +145,27 @@ def basemap_text(image, region):
     """Adds branding to image"""
     draw = ImageDraw.Draw(image)
     w, h = image.size
-    x_pos = w - 220
-    y_pos = h - 100
     font = ImageFont.truetype('fonts/raleway.otf', 55)
     small_font = ImageFont.truetype('fonts/raleway.otf', 18)
 
-    if region == 'northeast':
-        color = (255, 255, 255)
+    if region == 'Conus':
+        draw.text((10, h - 23), "@wxGIF", (80, 80, 80), font=small_font)
+        draw.text((w - 210, h - 23), "Radar, made for Twitter",
+            (80, 80, 80), font=small_font)
+        return image
+
+    if region in ['southeast', 'southplains', 'pacsouthwest']:
+        x_pos = 20  # move branding to left side
+    else:
+        x_pos = w - 220
+
+    if region in ['southrockies']:
+        y_pos = h - 200
+    else:
+        y_pos = h - 100
+
+    if region in ['northeast', 'southeast', 'southmissvly', 'pacsouthwest']:
+        color = (250, 250, 250)
     else:
         color = (100, 100, 100)
 
@@ -152,10 +174,15 @@ def basemap_text(image, region):
     return image
 
 
-def crop_image(image):
+def crop_image(image, dimensions, from_bottom=True):
     cropped = Image.open(image)
     w, h = cropped.size
-    cropped.crop((0, 40, w, h)).save(image, "PNG", optimize=True)
+    if from_bottom:
+        cropped.crop((dimensions[0], dimensions[1], w - dimensions[2],
+            h - dimensions[3])).save(image, "PNG", optimize=True)
+    else:
+        cropped.crop((dimensions[0], dimensions[1], dimensions[2],
+            dimensions[3])).save(image, "PNG", optimize=True)
     return image
 
 

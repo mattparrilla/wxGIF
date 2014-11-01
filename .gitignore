@@ -12,6 +12,7 @@ gif/*/*.PNG
 gif/*/*.gif
 gif/*/*.png
 *.gfw
+gif/*.gif
 northeast_201*
 
 # C extensions
