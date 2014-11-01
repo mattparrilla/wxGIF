@@ -203,10 +203,6 @@ def make_gif(region, dimensions=(450, 585)):
     print "\nChanging radar palette"
     image_list = [change_palette(im) for im in new_projections]
 
-    if region == 'Conus':
-        make_custom_region('intermountainwest', image_list,
-            (150, 340, 1050, 1060), 450)
-
     print "\nGet timestamps"
     timestamps = [get_timestamp(image, timezone[region]) for image in image_list]
 
@@ -234,6 +230,10 @@ def make_gif(region, dimensions=(450, 585)):
     if bot:
         time = last_updated_radar(get_region(region)[-1], region)
         tweet_gif(filename, cropped_frames, time, region)
+
+    if region == 'Conus':
+        make_custom_region('intermountainwest', image_list,
+            (150, 340, 1050, 1060), 450)
 
 
 def resize_gif(region, frames, idx):
