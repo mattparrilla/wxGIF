@@ -9,11 +9,9 @@ trash
 app/static/img/thumbnails
 .sass-cache
 gif/*/*.PNG
-gif/*/*.png
 gif/*/*.gif
-
+gif/*/*.png
 *.gfw
-gif/*.gif
 northeast_201*
 
 # C extensions
