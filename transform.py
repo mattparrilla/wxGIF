@@ -132,7 +132,7 @@ def add_timestamp(image, timestamp, region):
     elif region == 'Conus':
         y_pos = h - 40
         x_pos = 10
-        color = (80, 80, 80)
+        color = (250, 250, 250)
     else:
         y_pos = 10
 
@@ -151,7 +151,7 @@ def basemap_text(image, region):
     if region == 'Conus':
         draw.text((10, h - 23), "@wxGIF", (80, 80, 80), font=small_font)
         draw.text((w - 210, h - 23), "Radar, made for Twitter",
-            (80, 80, 80), font=small_font)
+            (250, 250, 250), font=small_font)
         return image
 
     if region in ['southeast', 'southplains', 'pacsouthwest']:
