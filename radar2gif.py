@@ -78,7 +78,7 @@ hashtags = {
     'intermountainwest': '#idwx #utwx #cawx #nvwx #orwx',
     'pacsouthwest': '#cawx #nvwx',
     'southeast': '#ncwx #scwx #gawx #flwx',
-    'southmissvly': '#lawx #arwx #miwx #alwx',
+    'southmissvly': '#lawx #arwx #mswx #alwx',
     'southplains': '#txwx #okwx',
     'southrockies': '#azwx #nmwx',
     'uppermissvly': '#ndwx #sdwx #mnwx #newx #iawx #kswx #mowx',
