@@ -34,6 +34,10 @@ Look inside the `gif/` directory and you'll see `northeast.gif` the full-sized G
 7. Incorporate warnings/watches
 8. Turn into web app
 
+##Data Source
+
+http://radar.weather.gov/GIS.html
+
 ##License
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
