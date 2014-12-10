@@ -6,7 +6,7 @@ import os
 import sys
 from PIL import Image
 from datetime import datetime, timedelta
-from libs.images2gif import writeGif
+from libs.images2gif import writeGif, readGif
 from bs4 import BeautifulSoup as Soup
 from twython import Twython
 from config import APP_KEY, APP_SECRET, twitter_keys
@@ -194,7 +194,44 @@ def make_custom_region(name, images, crop, width=450):
         tweet_gif(filename, opened_images, time, name)
 
 
-def make_gif(region, dimensions=(450, 585)):
+def conus_to_region():
+    """CONUS image is 3400 by 1600. Resized image is 2800 by 1674.
+    The regions are sections of the CONUS image, 5 sections wide and 2 tall
+    so we can create a grid and crop each region.
+    Current twitter max width is 560 (hence 2800 width, which is 560 x 5)
+    giving us image dimensions of 560 by 837"""
+
+    regions = {
+        'pacnorthwest': [0, 0],
+        'northrockies': [1, 0],
+        'uppermissvly': [2, 0],
+        'centgrtlakes': [3, 0],
+        'northeast': [4, 0],
+        'pacsouthwest': [0, 1],
+        'southrockies': [1, 1],
+        'southplains': [2, 1],
+        'southmissvly': [3, 1],
+        'southeast': [4, 1]
+    }
+
+    for region, location in regions.iteritems():
+        left = location[0] * 560
+        upper = location[1] * 837
+        right = left + 560
+        lower = upper + 837
+
+        gif = readGif('gif/Conus.gif', False)
+        frames = []
+        for image in gif:
+            frame = image.crop((left, upper, right, lower))
+            frames.append(frame)
+
+        writeGif('gif/%s.gif' % region, frames)
+
+conus_to_region()
+
+
+def make_gif(region, dimensions=(2800, 1674)):
     images = download_radar_images(region)
 
     print "\nChanging radar projection"
@@ -218,7 +255,7 @@ def make_gif(region, dimensions=(450, 585)):
         if region == 'northeast':
             frames = [crop_image(image, (0, 40, 0, 0)) for image in frames]
         elif region == 'southrockies':
-            frames = [crop_image(image, (0, 0, 0, 100)) for image in frames]
+            frames = [crop_image(image, (0, 50, 0, 100)) for image in frames]
 
     print "\nConvert image format"
     cropped_frames = [Image.open(im) for im in frames]
@@ -277,6 +314,10 @@ def get_map_bounds(region, dimensions=(840, 800)):
     for href in radar_urls:
         if region in href and ".gfw" in href:
             gfw = href
+            break
+        elif region == 'Conus' and 'latest_radaronly.gfw' in href:
+            gfw = href
+            break
 
     r = requests.get(base_url + gfw)
     gfw = r.text.replace('\r', '').split('\n')
@@ -296,5 +337,5 @@ def get_map_bounds(region, dimensions=(840, 800)):
     print "%f,%f,%f,%f" % (top_left_coords[0], bottom_right_coords[1],
         bottom_right_coords[0], top_left_coords[1])
 
-make_gif(region)
-#get_map_bounds('latest', (3400, 1600))
+#make_gif(region)
+#get_map_bounds('Conus', (3400, 1600))
