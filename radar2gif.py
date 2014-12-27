@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from download_radar import download_images
-from transform import change_projection, add_basemap, change_palette
+from transform import change_projection, add_basemap
 from image_manipulation import crop, resize
 from libs.images2gif import writeGif
 from PIL import Image
@@ -18,14 +18,14 @@ def radar_to_gif(publish=False, tweet=False):
     Optionally saves to S3 and publishes to twitter
     Source imagery: http://radar.weather.gov/GIS.html"""
 
-    # radar = download_images()
+    radar = download_images()
 
     # Transform Radar
-    # reprojected = [change_projection(image) for image in radar]
-    mypath = "gif/new_projection"
-    onlyfiles = ["gif/new_projection/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
-    new_palette = [change_palette(image) for image in onlyfiles]
-    radar_and_basemap = [add_basemap(image) for image in new_palette]
+    reprojected = [change_projection(image) for image in radar]
+    #mypath = "gif/new_projection"
+    #onlyfiles = ["gif/new_projection/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
+    #new_palette = [change_palette(image) for image in reprojected]
+    radar_and_basemap = [add_basemap(image) for image in reprojected]
 
     # Create a list of gifs to be published
     gifs = []

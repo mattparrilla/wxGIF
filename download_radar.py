@@ -14,7 +14,7 @@ def download_images():
     radar_src = get_all_radar_urls()
     conus_src = get_conus(radar_src)
     world_file_url = "%s/latest_radaronly.gfw" % BASE_URL
-    world_file = requests.get(world_file_url)
+    world_file = requests.get(world_file_url).text
 
     saved_radar = [save_radar(image, world_file) for image in conus_src]
 
@@ -37,7 +37,7 @@ def save_radar(src, world_file):
 
         # Save world file
         with open(gfw, "wb") as f:
-            f.write(world_file.text)
+            f.write(world_file)
 
         return name
 

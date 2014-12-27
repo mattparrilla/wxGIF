@@ -23,16 +23,14 @@ def change_projection(filename, old_projection='EPSG:4269',
     return "%s/%s-proj.%s" % (new_path, name, extension)
 
 
-def change_palette(image):
-    """Takes an image file and changes the palette"""
-
-    print "Changing palette of %s" % image
-    name = image.split('.')[0].split('/')[-1]
-    im = Image.open(image).convert("RGBA")
-    filename = "gif/new_palette/%s.png" % name
-    im.save(filename, "PNG")
-    return filename
-
+#def change_palette(image):
+#    """Takes an image file and changes the palette"""
+#
+#    print "Changing palette of %s" % image
+#
+#    name = image.split('.')[0].split('/')[-1]
+#    im = Image.open(image).convert("RGBA")
+#
 #    pixels = im.load()
 #
 #    for i in range(im.size[0]):
@@ -59,7 +57,8 @@ def add_basemap(radar):
         basemap.split('/')[-1].split('.')[0],
         timestamp.replace(':', ''))
 
-    background.paste(foreground, (0, 0), foreground).show()
+    background.paste(foreground, (0, 0), foreground)
+    background.show()
     background.convert("P").save(combined, "PNG", optimize=True)
 
     return combined
