@@ -92,13 +92,12 @@ def change_palette(image):
     return filename
 
 
-def add_basemap(radar):
+def add_basemap(radar, basemap="basemap/Conus.png"):
     """Add Conus basemap underneath radar image"""
 
     print "Adding basemap to %s" % radar
 
     timestamp = radar.split('/')[-1].split('_')[2]
-    basemap = "basemap/Conus.png"
     background = Image.open(basemap)
     foreground = Image.open(radar).convert("RGBA")
     combined = "gif/basemap/%s-bm-%s.png" % (

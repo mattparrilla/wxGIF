@@ -6,9 +6,14 @@ def crop(image_file, coordinates):
 
     print "Cropping %s" % image_file
 
+    # New basemap is 80% of size of previous basemap, so region coordinates
+    # need to be scaled accordingly
+    scaled_coords = [int(i * 0.8) for i in coordinates]
+
     image = Image.open(image_file)
-    cropped = image.crop((coordinates[0], coordinates[1], coordinates[2],
-            coordinates[3]))
+    cropped = image.crop((scaled_coords[0], scaled_coords[1], scaled_coords[2],
+            scaled_coords[3]))
+
     return cropped
 
 
@@ -23,7 +28,7 @@ def resize(image, width=560.0):
     return im
 
 
-def resize_and_save(image, width=2800.0):
+def resize_and_save(image, width=2240.0):
     """Takes a file path, opens in PIL, resizes, converts to RGBA and returns
     a file path"""
 

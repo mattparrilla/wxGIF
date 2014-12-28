@@ -26,9 +26,9 @@
                 1550
             ],
             "pacificnorthwest": [
+                80,
                 50,
-                50,
-                800,
+                780,
                 650
             ],
             "tornadoalley": [
@@ -44,9 +44,9 @@
                 750
             ],
             "northernrockies": [
-                400,
-                500,
-                1200,
+                450,
+                50,
+                1150,
                 650
             ],
             "greatlakes": [
