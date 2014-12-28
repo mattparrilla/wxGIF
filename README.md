@@ -8,6 +8,10 @@ Very much a work in progress. Feel free to pull and contribute or clone and use 
 
 http://radar.weather.gov/GIS.html
 
+##Bounding Coordinates
+
+-127.620376,21.652538,-66.517938,50.406626
+
 ##License
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.

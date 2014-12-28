@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from download_radar import download_images
-from transform import change_projection, add_basemap
-from image_manipulation import crop, resize
+from transform import change_projection, add_basemap, change_palette
+from image_manipulation import crop, resize, resize_and_save
 from libs.images2gif import writeGif
 from PIL import Image
 from config import SAVE_TO_DIR
@@ -21,16 +21,17 @@ def radar_to_gif(publish=False, tweet=False):
     radar = download_images()
 
     # Transform Radar
+    #mypath = "gif/source"
+    #onlyfiles = ["gif/source/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
     reprojected = [change_projection(image) for image in radar]
-    #mypath = "gif/new_projection"
-    #onlyfiles = ["gif/new_projection/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
-    #new_palette = [change_palette(image) for image in reprojected]
-    radar_and_basemap = [add_basemap(image) for image in reprojected]
+    new_palette = [change_palette(image) for image in reprojected]
+    base_width = [resize_and_save(image) for image in new_palette]
+    radar_and_basemap = [add_basemap(image) for image in base_width]
 
     # Create a list of gifs to be published
     gifs = []
 
-    # Get data about all regions
+    ## Get data about all regions
     with open('regions.json', 'r') as f:
         regions = json.load(f)
 
@@ -43,9 +44,9 @@ def radar_to_gif(publish=False, tweet=False):
         gifs.append(gif)
 
     # Special case: continental united states does not need to be cropped
-    resized_conus = [resize(Image.open(image)) for image in radar_and_basemap]
     #conus_with_text = [add_text(image) for image in resized_conus]
-    gif = generate_gif(resized_conus, 'Conus')
+    pil_objects = [Image.open(image) for image in radar_and_basemap]
+    gif = generate_gif(pil_objects, 'Conus')
     gifs.append(gif)
 
     if publish:

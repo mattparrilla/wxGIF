@@ -15,10 +15,19 @@ def crop(image_file, coordinates):
 def resize(image, width=560.0):
     """Resizes an image to a given width"""
 
-    print "Resizing %s" % image
     original_width = image.size[0]
     original_height = image.size[1]
     height = width * original_height / original_width
     size = (int(width), int(height))
     im = ImageOps.fit(image, size, Image.ANTIALIAS)
     return im
+
+
+def resize_and_save(image, width=2800.0):
+    """Takes a file path, opens in PIL, resizes, converts to RGBA and returns
+    a file path"""
+
+    im = Image.open(image)
+    resized_image = resize(im, width)
+    resized_image.save(image, "PNG", optimize=True)
+    return image
