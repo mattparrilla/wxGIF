@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import os
-from PIL import Image
+import json
+from PIL import Image, ImageDraw, ImageFont
 
 nws_colors = [(152, 84, 198, 255),
     (248, 0, 253, 255),
@@ -27,28 +28,14 @@ nws_colors = [(152, 84, 198, 255),
     (240, 240, 240, 255),
     (255, 255, 255, 255)]
 
-new_colors = [(0, 0, 0, 255),
-    (50, 0, 0, 255),
-    (100, 0, 0, 255),
-    (158, 1, 66, 255),
-    (213, 62, 79, 255),
-    (244, 109, 67, 255),
-    (253, 174, 97, 255),
-    (254, 224, 139, 255),
-    (255, 255, 191, 255),
-    (230, 245, 152, 255),
-    (171, 221, 164, 255),
-    (102, 194, 165, 255),
-    (50, 136, 189, 255),
-    (94, 79, 162, 255),
-    # Below colors are mostly white
-    (150, 150, 150, 150),
-    (150, 150, 150, 130),
-    (150, 150, 150, 110),
-    (150, 150, 150, 90),
-    (150, 150, 150, 70),
-    (150, 150, 150, 50),
-    (150, 150, 150, 30),
+negatives = [
+    (150, 150, 150, 100),
+    (150, 150, 150, 80),
+    (150, 150, 150, 60),
+    (150, 150, 150, 40),
+    (150, 150, 150, 20),
+    (150, 150, 150, 0),
+    (150, 150, 150, 0),
     (255, 255, 255, 0)]
 
 
@@ -71,10 +58,13 @@ def change_projection(filename, old_projection='EPSG:4269',
     return "%s/%s-proj.%s" % (new_path, name, extension)
 
 
-def change_palette(image):
+def change_palette(image, color_scheme='YlOrRd'):
     """Takes an image file and changes the palette"""
 
-    print "Changing palette of %s" % image
+    with open('palettes.json', 'r') as f:
+        palettes = json.load(f)
+
+    palette = expand_palette(palettes[color_scheme])[::-1]
 
     name = image.split('.')[0].split('/')[-1]
     im = Image.open(image).convert("RGBA")
@@ -84,7 +74,16 @@ def change_palette(image):
     for i in range(im.size[0]):
         for j in range(im.size[1]):
             if pixels[i, j] in nws_colors:
-                pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
+                index = nws_colors.index(pixels[i, j])
+
+                # The first 14 colors of the NWS palette correspond to positive
+                # DBZ values (so rain clouds).
+                if index < 14:
+                    pixels[i, j] = palette[index]
+
+                # The rest of the colors are mostly transparent greys
+                elif index > 0:
+                    pixels[i, j] = negatives[index - 14]
 
     filename = "gif/new_palette/%s.%s" % (name, "png")
     im.save(filename, "PNG")
@@ -92,19 +91,74 @@ def change_palette(image):
     return filename
 
 
-def add_basemap(radar, basemap="basemap/Conus.png"):
-    """Add Conus basemap underneath radar image"""
+def expand_palette(palette):
+    """Takes a colorbrewer palette of length 8 and uses it to build a palette
+    of 14 colors."""
+
+    new_palette = [0] * 15  # is 15 instead of 14 to create upper bound
+
+    for i, color in enumerate(palette):
+        new_palette[2 * i] = tuple(color)
+
+    for i, color in enumerate(new_palette):
+        if not color:
+            r1, g1, b1, a1 = new_palette[i - 1]
+            r2, g2, b2, a2 = new_palette[i + 1]
+            new_r = (r1 + r2) / 2
+            new_g = (g1 + g2) / 2
+            new_b = (b1 + b2) / 2
+            new_a = (a1 + a2) / 2
+            new_palette[i] = (new_r, new_g, new_b, new_a)
+
+    return new_palette
+
+
+def add_basemap(radar, regions=None, basemap="basemap/Conus.png"):
+    """Add Conus basemap and copy (via `add_text`) underneath radar image"""
 
     print "Adding basemap to %s" % radar
 
     timestamp = radar.split('/')[-1].split('_')[2]
-    background = Image.open(basemap)
+    background = add_text(Image.open(basemap), timestamp, regions)
     foreground = Image.open(radar).convert("RGBA")
     combined = "gif/basemap/%s-bm-%s.png" % (
-        basemap.split('/')[-1].split('.')[0],
-        timestamp.replace(':', ''))
+        basemap.split('/')[-1].split('.')[0], timestamp)
 
     background.paste(foreground, (0, 0), foreground)
     background.convert("P").save(combined, "PNG", optimize=True)
 
     return combined
+
+
+def add_text(image, timestamp, regions=None, copy="wxGIF"):
+    """Adds copy and timestamp for all regions to uncropped basemap"""
+
+    timestamp = timestamp[:-2] + ':' + timestamp [-2:]
+    draw = ImageDraw.Draw(image)
+    color = (200, 200, 200)
+
+    if regions is not None:
+        for region, attributes in regions.items():
+            # attributes['corner'] uses cardinal directions, i.e. 'ne'
+            if attributes['corner']:
+                if 'n' in attributes['corner']:
+                    y1 = attributes['coordinates'][1] + 5
+                    y2 = attributes['coordinates'][1] + 25
+                elif 's' in attributes['corner']:
+                    y1 = attributes['coordinates'][3] - 45
+                    y2 = attributes['coordinates'][3] - 25
+
+                if 'w' in attributes['corner']:
+                    x1 = attributes['coordinates'][0] + 10
+                    x2 = attributes['coordinates'][0] + 10
+                elif 'e' in attributes['corner']:
+                    x1 = attributes['coordinates'][2] - 63
+                    x2 = attributes['coordinates'][2] - 63
+
+                font = ImageFont.truetype('fonts/rokkitt.otf', 28)
+                draw.text((x1, y1), timestamp, color, font=font)
+
+                label_font = ImageFont.truetype('fonts/raleway.otf', 18)
+                draw.text((x2, y2), copy, color, font=label_font)
+
+    return image

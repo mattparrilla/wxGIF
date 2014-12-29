@@ -1,72 +1,101 @@
-{"coordinates":
-    [
-        {
-            "uppermissvly": [
-                1050,
-                50,
-                1750,
-                700
-            ],
-            "pacificsouthwest": [
-                100,
-                500,
-                700,
-                1150
-            ],
-            "southernrockies": [
-                550,
-                500,
-                1200,
-                1200
-            ],
-            "deepsouth": [
-                1600,
-                900,
-                2300,
-                1550
-            ],
-            "pacificnorthwest": [
-                80,
-                50,
-                780,
-                650
-            ],
-            "tornadoalley": [
-                1100,
-                600,
-                1800,
-                1100
-            ],
-            "northeast": [
-                2150,
-                150,
-                2800,
-                750
-            ],
-            "northernrockies": [
-                450,
-                50,
-                1150,
-                650
-            ],
-            "greatlakes": [
-                1550,
-                100,
-                2250,
-                900
-            ],
-            "midatlantic": [
-                1700,
-                600,
-                2400,
-                1150
-            ],
-            "texas": [
-                900,
-                800,
-                1600,
-                1500
-            ]
-        }
-    ]
+{
+    "northeast": {
+        "corner": "se",
+        "coordinates": [
+            1680,
+            120,
+            2240,
+            600
+        ]
+    },
+    "northernrockies": {
+        "corner": false,
+        "coordinates": [
+            360,
+            40,
+            920,
+            520
+        ]
+    },
+    "pacificsouthwest": {
+        "corner": "sw",
+        "coordinates": [
+            40,
+            400,
+            600,
+            920
+        ]
+    },
+    "southernrockies": {
+        "corner": "sw",
+        "coordinates": [
+            400,
+            400,
+            960,
+            960
+        ]
+    },
+    "uppermissvly": {
+        "corner": "nw",
+        "coordinates": [
+            840,
+            40,
+            1400,
+            560
+        ]
+    },
+    "tornadoalley": {
+        "corner": false,
+        "coordinates": [
+            880,
+            480,
+            1440,
+            880
+        ]
+    },
+    "greatlakes": {
+        "corner": "ne",
+        "coordinates": [
+            1240,
+            80,
+            1800,
+            720
+        ]
+    },
+    "deepsouth": {
+        "corner": "nw",
+        "coordinates": [
+            1280,
+            720,
+            1840,
+            1240
+        ]
+    },
+    "midatlantic": {
+        "corner": "se",
+        "coordinates": [
+            1360,
+            480,
+            1920,
+            920
+        ]
+    },
+    "pacificnorthwest": {
+        "corner": "nw",
+        "coordinates": [
+            64,
+            40,
+            624,
+            520
+        ]
+    },
+    "texas": {
+        "corner": "sw",
+        "coordinates": [
+            720,
+            640,
+            1280,
+            1200
+        ]
+    }
 }

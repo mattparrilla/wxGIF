@@ -18,39 +18,40 @@ def radar_to_gif(publish=False, tweet=False):
     Optionally saves to S3 and publishes to twitter
     Source imagery: http://radar.weather.gov/GIS.html"""
 
-    #radar = download_images()
-
-    # Transform Radar
-    mypath = "gif/new_palette"
-    new_palette = ["gif/new_palette/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
-    #reprojected = [change_projection(image) for image in radar]
-    #new_palette = [change_palette(image) for image in reprojected]
-    #base_width = [resize_and_save(image) for image in new_palette]
-    #radar_and_basemap = [add_basemap(image) for image in base_width]
-
-    # Create a list of gifs to be published
-    gifs = []
-
     # Get data about all regions
     with open('regions.json', 'r') as f:
         regions = json.load(f)
 
+    #radar = download_images()
+
+    # Transform Radar
+    mypath = "gif/new_projection"
+    reprojected = ["gif/new_projection/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
+    #reprojected = [change_projection(image) for image in radar]
+    new_palette = [change_palette(image) for image in reprojected]
+    base_width = [resize_and_save(image) for image in new_palette]
+    radar_and_basemap = [add_basemap(image, regions) for image in base_width]
+
+    # Create a list of gifs to be published
+    gifs = []
+
+
     # Loop through regions, creating GIF
-    #for region, coordinates in regions['coordinates'][0].items():
-    #    cropped = [crop(image, coordinates) for image in radar_and_basemap]
-    #    resized = [resize(image) for image in cropped]
-    #    #region_with_text = [add_text(image) for image in resized]
-    #    gif = generate_gif(resized, region)
-    #    gifs.append(gif)
+    for region, details in regions.items():
+        cropped = [crop(image, details['coordinates'])
+            for image in radar_and_basemap]
+        resized = [resize(image) for image in cropped]
+        gif = generate_gif(resized, region)
+        gifs.append(gif)
 
     # Special case: continental united states does not need to be cropped
-    conus_width = [resize_and_save(image, width=560) for image in new_palette]
-    radar_and_conus = [add_basemap(image, "basemap/Conus-sm.png")
-        for image in conus_width]
-    #conus_with_text = [add_text(image) for image in resized_conus]
-    pil_objects = [Image.open(image) for image in radar_and_conus]
-    gif = generate_gif(pil_objects, 'Conus')
-    gifs.append(gif)
+    #conus_width = [resize_and_save(image, width=560) for image in new_palette]
+    #radar_and_conus = [add_basemap(image, "basemap/Conus-sm.png")
+    #    for image in conus_width]
+    ##conus_with_text = [add_text(image) for image in resized_conus]
+    #pil_objects = [Image.open(image) for image in radar_and_conus]
+    #gif = generate_gif(pil_objects, 'Conus')
+    #gifs.append(gif)
 
     if publish:
         for gif in gifs:
