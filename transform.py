@@ -113,7 +113,7 @@ def expand_palette(palette):
     return new_palette
 
 
-def add_basemap(radar, regions=None, basemap="basemap/Conus.png"):
+def add_basemap(radar, regions='Conus', basemap="basemap/Conus.png"):
     """Add Conus basemap and copy (via `add_text`) underneath radar image"""
 
     print "Adding basemap to %s" % radar
@@ -130,14 +130,26 @@ def add_basemap(radar, regions=None, basemap="basemap/Conus.png"):
     return combined
 
 
-def add_text(image, timestamp, regions=None, copy="wxGIF"):
+def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
     """Adds copy and timestamp for all regions to uncropped basemap"""
 
     timestamp = timestamp[:-2] + ':' + timestamp [-2:]
     draw = ImageDraw.Draw(image)
     color = (200, 200, 200)
 
-    if regions is not None:
+    if regions == 'Conus':
+        x1 = image.size[0] - 63
+        x2 = image.size[0] - 63
+        y1 = image.size[1] - 45
+        y2 = image.size[1] - 25
+
+        font = ImageFont.truetype('fonts/rokkitt.otf', 28)
+        draw.text((x1, y1), timestamp, color, font=font)
+
+        label_font = ImageFont.truetype('fonts/raleway.otf', 18)
+        draw.text((x2, y2), copy, color, font=label_font)
+
+    else:  # If regional imagery
         for region, attributes in regions.items():
             # attributes['corner'] uses cardinal directions, i.e. 'ne'
             if attributes['corner']:

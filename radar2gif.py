@@ -30,7 +30,7 @@ def radar_to_gif(publish=False, tweet=False):
     reprojected = [change_projection(image) for image in radar]
     new_palette = [change_palette(image) for image in reprojected]
     base_width = [resize_and_save(image) for image in new_palette]
-    radar_and_basemap = [add_basemap(image, regions) for image in base_width]
+    radar_and_basemap = [add_basemap(image, regions=regions) for image in base_width]
 
     # Create a list of gifs to be published
     gifs = []
@@ -46,7 +46,7 @@ def radar_to_gif(publish=False, tweet=False):
 
     # Special case: continental united states does not need to be cropped
     conus_width = [resize_and_save(image, width=560) for image in new_palette]
-    radar_and_conus = [add_basemap(image, "basemap/Conus-sm.png")
+    radar_and_conus = [add_basemap(image, basemap="basemap/Conus-sm.png")
         for image in conus_width]
     #conus_with_text = [add_text(image) for image in resized_conus]
     pil_objects = [Image.open(image) for image in radar_and_conus]
