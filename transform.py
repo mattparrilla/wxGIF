@@ -38,6 +38,44 @@ negatives = [
     (150, 150, 150, 0),
     (255, 255, 255, 0)]
 
+new_rainbow = [
+    (138, 35, 117),
+    (147, 41, 128),
+    (161, 61, 142),
+    (176, 79, 156),
+    (76, 134, 178),
+    (93, 148, 192),
+    (110, 162, 207),
+    (114, 184, 160),
+    (128, 196, 173),
+    (141, 209, 185),
+    (211, 207, 182),
+    (221, 218, 192),
+    (230, 227, 201),
+    (204, 204, 204)]
+
+bl_gr_yl_rd_lt2dk = [
+    (222, 235, 247, 200),
+    (198, 219, 239, 255),
+    (161, 217, 155, 255),
+    (116, 196, 118, 255),
+    (65, 171, 93, 255),
+    (227, 26, 28, 255),
+    (189, 0, 38, 255),
+    (128, 0, 38, 255)]
+
+blgrylrd_dk2lt = [
+    (8, 48, 107, 255),
+    (8, 81, 156, 255),
+    (35, 139, 69, 255),
+    (65, 171, 93, 255),
+    (116, 196, 118, 255),
+    (254, 178, 76, 255),
+    (252, 187, 161, 255),
+    (254, 224, 210, 255)]
+
+
+
 
 def change_projection(filename, old_projection='EPSG:4269',
                       new_projection='EPSG:3857'):
@@ -58,13 +96,14 @@ def change_projection(filename, old_projection='EPSG:4269',
     return "%s/%s-proj.%s" % (new_path, name, extension)
 
 
-def change_palette(image, color_scheme='YlOrRd'):
+def change_palette(image, color_scheme='YlGnBu'):
     """Takes an image file and changes the palette"""
 
     with open('palettes.json', 'r') as f:
         palettes = json.load(f)
 
-    palette = expand_palette(palettes[color_scheme])[::-1]
+    palette = expand_palette(palettes[color_scheme])[::-1]  # reverse list
+    #palette = expand_palette(bl_gr_yl_rd_lt2dk[::-1])
 
     name = image.split('.')[0].split('/')[-1]
     im = Image.open(image).convert("RGBA")
