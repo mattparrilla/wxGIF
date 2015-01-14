@@ -74,6 +74,12 @@ blgrylrd_dk2lt = [
     (252, 187, 161, 255),
     (254, 224, 210, 255)]
 
+hcl = ["3D4979","6F4E8B","985495","BA6193","D37487","E28E71",
+          "E6AB55","DDCB42"]
+
+
+
+hcl_palette = [tuple(ord(c) for c in color.decode('hex')) for color in hcl]
 
 
 
@@ -102,8 +108,8 @@ def change_palette(image, color_scheme='YlGnBu'):
     with open('palettes.json', 'r') as f:
         palettes = json.load(f)
 
-    palette = expand_palette(palettes[color_scheme])[::-1]  # reverse list
-    #palette = expand_palette(bl_gr_yl_rd_lt2dk[::-1])
+    #palette = expand_palette(palettes[color_scheme])[::-1]  # reverse list
+    palette = expand_palette(hcl_palette[::-1])
 
     name = image.split('.')[0].split('/')[-1]
     im = Image.open(image).convert("RGBA")
@@ -141,8 +147,15 @@ def expand_palette(palette):
 
     for i, color in enumerate(new_palette):
         if not color:
-            r1, g1, b1, a1 = new_palette[i - 1]
-            r2, g2, b2, a2 = new_palette[i + 1]
+            try:
+                r1, g1, b1, a1 = new_palette[i - 1]
+                r2, g2, b2, a2 = new_palette[i + 1]
+            # exception occurs when palette doesn't have alpha channel
+            except ValueError:
+                r1, g1, b1 = new_palette[i - 1]
+                a1 = 255
+                r2, g2, b2 = new_palette[i + 1]
+                a2 = 255
             new_r = (r1 + r2) / 2
             new_g = (g1 + g2) / 2
             new_b = (b1 + b2) / 2

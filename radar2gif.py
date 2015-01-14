@@ -25,9 +25,9 @@ def radar_to_gif(publish=False, tweet=False):
     #radar = download_images()
 
     # Transform Radar
-    mypath = "gif/new_projection"
-    reprojected = ["gif/new_projection/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
-    ##reprojected = [change_projection(image) for image in radar]
+    mypath = "gif/reprojected"
+    reprojected = ["gif/reprojected/%s" % f for f in listdir(mypath) if isfile(join(mypath, f)) and f != '.DS_Store']
+    #reprojected = [change_projection(image) for image in radar]
     new_palette = [change_palette(image) for image in reprojected]
     base_width = [resize_and_save(image) for image in new_palette]
     radar_and_basemap = [add_basemap(image, regions=regions) for image in base_width]
