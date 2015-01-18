@@ -4,6 +4,8 @@ This project generates GIFs of NWS radar images and auto tweets them at regular 
 
 Very much a work in progress. Feel free to pull and contribute or clone and use it yourself!
 
+![Weather GIF, Mid-Atlantic](http://i.imgur.com/75bEfcY.gif)
+
 ##Data Source
 
 http://radar.weather.gov/GIS.html
