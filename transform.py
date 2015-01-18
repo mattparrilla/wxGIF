@@ -102,13 +102,13 @@ def change_projection(filename, old_projection='EPSG:4269',
     return "%s/%s-proj.%s" % (new_path, name, extension)
 
 
-def change_palette(image, color_scheme='YlGnBu'):
+def change_palette(image, color_scheme='Spectral'):
     """Takes an image file and changes the palette"""
 
     with open('palettes.json', 'r') as f:
         palettes = json.load(f)
 
-    #palette = expand_palette(palettes[color_scheme])[::-1]  # reverse list
+    #palette = expand_palette(palettes[color_scheme])
     palette = expand_palette(hcl_palette[::-1])
 
     name = image.split('.')[0].split('/')[-1]

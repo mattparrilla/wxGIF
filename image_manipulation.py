@@ -28,6 +28,8 @@ def resize_and_save(image, width=2240.0):
     """Takes a file path, opens in PIL, resizes, converts to RGBA and returns
     a file path"""
 
+    print "Resizing %s" % image
+    print "Width: %s" % width
     im = Image.open(image)
     resized_image = resize(im, width)
     resized_image.save(image, "PNG", optimize=True)
