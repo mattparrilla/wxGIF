@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from PIL import Image, ImageDraw, ImageFont
 import os
-import arrow
+import json
+from PIL import Image, ImageDraw, ImageFont
 
 nws_colors = [(152, 84, 198, 255),
     (248, 0, 253, 255),
@@ -28,47 +28,107 @@ nws_colors = [(152, 84, 198, 255),
     (240, 240, 240, 255),
     (255, 255, 255, 255)]
 
-new_colors = [(0, 0, 0, 255),
-    (50, 0, 0, 255),
-    (100, 0, 0, 255),
-    (158, 1, 66, 255),
-    (213, 62, 79, 255),
-    (244, 109, 67, 255),
-    (253, 174, 97, 255),
-    (254, 224, 139, 255),
-    (255, 255, 191, 255),
-    (230, 245, 152, 255),
-    (171, 221, 164, 255),
-    (102, 194, 165, 255),
-    (50, 136, 189, 255),
-    (94, 79, 162, 255),
-    # Below colors are mostly white
-    (150, 150, 150, 150),
-    (150, 150, 150, 130),
-    (150, 150, 150, 110),
-    (150, 150, 150, 90),
-    (150, 150, 150, 70),
-    (150, 150, 150, 50),
+negatives = [
+    (150, 150, 150, 60),
     (150, 150, 150, 30),
+    (150, 150, 150, 0),
+    (150, 150, 150, 0),
+    (150, 150, 150, 0),
+    (150, 150, 150, 0),
+    (150, 150, 150, 0),
     (255, 255, 255, 0)]
 
-region_to_tz = {'northeast': 'US/Eastern',
-    'pacnorthwest': 'US/Pacific',
-    'northrockies': 'US/Mountain'}
+new_rainbow = [
+    (138, 35, 117),
+    (147, 41, 128),
+    (161, 61, 142),
+    (176, 79, 156),
+    (76, 134, 178),
+    (93, 148, 192),
+    (110, 162, 207),
+    (114, 184, 160),
+    (128, 196, 173),
+    (141, 209, 185),
+    (211, 207, 182),
+    (221, 218, 192),
+    (230, 227, 201),
+    (204, 204, 204)]
+
+bl_gr_yl_rd_lt2dk = [
+    (222, 235, 247, 200),
+    (198, 219, 239, 255),
+    (161, 217, 155, 255),
+    (116, 196, 118, 255),
+    (65, 171, 93, 255),
+    (227, 26, 28, 255),
+    (189, 0, 38, 255),
+    (128, 0, 38, 255)]
+
+blgrylrd_dk2lt = [
+    (8, 48, 107, 255),
+    (8, 81, 156, 255),
+    (35, 139, 69, 255),
+    (65, 171, 93, 255),
+    (116, 196, 118, 255),
+    (254, 178, 76, 255),
+    (252, 187, 161, 255),
+    (254, 224, 210, 255)]
+
+hcl = ["3D4979","6F4E8B","985495","BA6193","D37487","E28E71",
+          "E6AB55","DDCB42"]
 
 
-def change_palette(image):
-    """Takes a list of dicts of images {'name': name, 'image': PIL.Image}
-    converts the NWS palette to a new palette, returns list of filenames"""
+
+hcl_palette = [tuple(ord(c) for c in color.decode('hex')) for color in hcl]
+
+
+
+def change_projection(filename, old_projection='EPSG:4269',
+                      new_projection='EPSG:3857'):
+
+    """Change the projection of the GIF using the appropraite world file and
+    the command-line tool `gdalwarp`. By default changes NWS projection to
+    Google Mercator"""
+
+    print "Changing projection of %s" % filename
+
+    path, extension = filename.split('.')
+    name = path.split('/')[-1]
+    new_path = 'gif/new_projection'
+    gdalwarp = 'gdalwarp -s_srs %s -t_srs %s %s %s/%s-proj.%s' % (
+        old_projection, new_projection, filename, new_path, name, extension)
+    os.system(gdalwarp)
+
+    return "%s/%s-proj.%s" % (new_path, name, extension)
+
+
+def change_palette(image, color_scheme='Spectral'):
+    """Takes an image file and changes the palette"""
+
+    with open('palettes.json', 'r') as f:
+        palettes = json.load(f)
+
+    #palette = expand_palette(palettes[color_scheme])
+    palette = expand_palette(hcl_palette[::-1])
 
     name = image.split('.')[0].split('/')[-1]
     im = Image.open(image).convert("RGBA")
+
     pixels = im.load()
 
     for i in range(im.size[0]):
         for j in range(im.size[1]):
             if pixels[i, j] in nws_colors:
-                pixels[i, j] = new_colors[nws_colors.index(pixels[i, j])]
+                index = nws_colors.index(pixels[i, j])
+
+                # The first 14 colors of the NWS palette correspond to positive
+                # DBZ values (so rain clouds).
+                if index < 14:
+                    pixels[i, j] = palette[index]
+
+                # The rest of the colors are mostly transparent greys
+                elif index > 0:
+                    pixels[i, j] = negatives[index - 14]
 
     filename = "gif/new_palette/%s.%s" % (name, "png")
     im.save(filename, "PNG")
@@ -76,32 +136,45 @@ def change_palette(image):
     return filename
 
 
-def resize_image(image, dimensions):
-    im = Image.open(image)
-    im.thumbnail(dimensions)
-    return im
+def expand_palette(palette):
+    """Takes a colorbrewer palette of length 8 and uses it to build a palette
+    of 14 colors."""
+
+    new_palette = [0] * 15  # is 15 instead of 14 to create upper bound
+
+    for i, color in enumerate(palette):
+        new_palette[2 * i] = tuple(color)
+
+    for i, color in enumerate(new_palette):
+        if not color:
+            try:
+                r1, g1, b1, a1 = new_palette[i - 1]
+                r2, g2, b2, a2 = new_palette[i + 1]
+            # exception occurs when palette doesn't have alpha channel
+            except ValueError:
+                r1, g1, b1 = new_palette[i - 1]
+                a1 = 255
+                r2, g2, b2 = new_palette[i + 1]
+                a2 = 255
+            new_r = (r1 + r2) / 2
+            new_g = (g1 + g2) / 2
+            new_b = (b1 + b2) / 2
+            new_a = (a1 + a2) / 2
+            new_palette[i] = (new_r, new_g, new_b, new_a)
+
+    return new_palette
 
 
-#def change_basemap(filename="basemap/northeast-outline.png"):
-#    im = Image.open(filename)
-#    pixels = im.load()
-#    print pixels[0, 1]
-#    for i in range(im.size[0]):
-#        for j in range(im.size[1]):
-#            if pixels[i, j] == (134, 134, 134, 127):
-#                pixels[i, j] = (255, 255, 255, 0)
-#
-#    filename = "basemap/test.PNG"
-#    im.save(filename, "PNG", dpi=[100, 100])
+def add_basemap(radar, regions='Conus', basemap="basemap/Conus.png"):
+    """Add Conus basemap and copy (via `add_text`) underneath radar image"""
 
+    print "Adding basemap to %s" % radar
 
-def add_basemap(radar, timestamp, region):
-    basemap = "basemap/%s.png" % region
-    background = basemap_text(Image.open(basemap), region)
-    foreground = add_timestamp(radar, timestamp, region)
+    timestamp = radar.split('/')[-1].split('_')[2]
+    background = add_text(Image.open(basemap), timestamp, regions)
+    foreground = Image.open(radar).convert("RGBA")
     combined = "gif/basemap/%s-bm-%s.png" % (
-        basemap.split('/')[-1].split('.')[0],
-        timestamp.replace(':', ''))
+        basemap.split('/')[-1].split('.')[0], timestamp)
 
     background.paste(foreground, (0, 0), foreground)
     background.convert("P").save(combined, "PNG", optimize=True)
@@ -109,92 +182,47 @@ def add_basemap(radar, timestamp, region):
     return combined
 
 
-def get_timestamp(filename, zone):
-    time = filename.split('/')[-1].split('_')[2]
-    utc_offset = arrow.now(zone).utcoffset()
-    delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
-    hour = int(time[:2]) + delta_t
-    if hour < 0:
-        hour += 24
-    hour = str(hour)
-    minutes = time[2:]
-    timestamp = hour + ':' + minutes
-    return timestamp
+def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
+    """Adds copy and timestamp for all regions to uncropped basemap"""
 
-
-def add_timestamp(image, timestamp, region):
+    timestamp = timestamp[:-2] + ':' + timestamp [-2:]
     draw = ImageDraw.Draw(image)
-    w, h = image.size
-    x_pos = 10
-    color = (100, 100, 100)
-    if region == 'northeast':
-        y_pos = 40
-    elif region == 'Conus':
-        y_pos = h - 40
-        x_pos = 10
-        color = (250, 250, 250)
-    else:
-        y_pos = 10
+    color = (200, 200, 200)
 
-    font = ImageFont.truetype('fonts/rokkitt.otf', 22)
-    draw.text((x_pos, y_pos), timestamp, color, font=font)
+    if regions == 'Conus':
+        x1 = image.size[0] - 63
+        x2 = image.size[0] - 63
+        y1 = image.size[1] - 45
+        y2 = image.size[1] - 25
+
+        font = ImageFont.truetype('fonts/rokkitt.otf', 28)
+        draw.text((x1, y1), timestamp, color, font=font)
+
+        label_font = ImageFont.truetype('fonts/raleway.otf', 18)
+        draw.text((x2, y2), copy, color, font=label_font)
+
+    else:  # If regional imagery
+        for region, attributes in regions.items():
+            # attributes['corner'] uses cardinal directions, i.e. 'ne'
+            if attributes['corner']:
+                if 'n' in attributes['corner']:
+                    y1 = attributes['coordinates'][1] + 5
+                    y2 = attributes['coordinates'][1] + 25
+                elif 's' in attributes['corner']:
+                    y1 = attributes['coordinates'][3] - 45
+                    y2 = attributes['coordinates'][3] - 25
+
+                if 'w' in attributes['corner']:
+                    x1 = attributes['coordinates'][0] + 10
+                    x2 = attributes['coordinates'][0] + 10
+                elif 'e' in attributes['corner']:
+                    x1 = attributes['coordinates'][2] - 63
+                    x2 = attributes['coordinates'][2] - 63
+
+                font = ImageFont.truetype('fonts/rokkitt.otf', 28)
+                draw.text((x1, y1), timestamp, color, font=font)
+
+                label_font = ImageFont.truetype('fonts/raleway.otf', 18)
+                draw.text((x2, y2), copy, color, font=label_font)
+
     return image
-
-
-def basemap_text(image, region):
-    """Adds branding to image"""
-    draw = ImageDraw.Draw(image)
-    w, h = image.size
-    font = ImageFont.truetype('fonts/raleway.otf', 55)
-    small_font = ImageFont.truetype('fonts/raleway.otf', 18)
-
-    if region == 'Conus':
-        draw.text((10, h - 23), "@wxGIF", (250, 250, 250), font=small_font)
-        draw.text((w - 210, h - 23), "Radar, made for Twitter",
-            (250, 250, 250), font=small_font)
-        return image
-
-    if region in ['southeast', 'southplains', 'pacsouthwest']:
-        x_pos = 20  # move branding to left side
-    else:
-        x_pos = w - 220
-
-    if region in ['southrockies']:
-        y_pos = h - 200
-    else:
-        y_pos = h - 100
-
-    if region in ['northeast', 'southeast', 'southmissvly', 'pacsouthwest']:
-        color = (250, 250, 250)
-    else:
-        color = (100, 100, 100)
-
-    draw.text((x_pos, y_pos), "@wxGIF", color, font=font)
-    draw.text((x_pos + 5, y_pos + 62), "Radar, made for Twitter", color, font=small_font)
-    return image
-
-
-def crop_image(image, dimensions, from_bottom=True):
-    cropped = Image.open(image)
-    w, h = cropped.size
-    if from_bottom:
-        cropped.crop((dimensions[0], dimensions[1], w - dimensions[2],
-            h - dimensions[3])).save(image, "PNG", optimize=True)
-    else:
-        cropped.crop((dimensions[0], dimensions[1], dimensions[2],
-            dimensions[3])).save(image, "PNG", optimize=True)
-    return image
-
-
-def change_projection(f, old_projection='EPSG:4269', new_projection='EPSG:3857'):
-    """Change the projection of the GIF with accompanying world file
-    By default changes NWS projection to Google Mercator"""
-
-    path, extension = f.split('.')
-    filename = path.split('/')[-1]
-    new_path = 'gif/new_projection'
-    gdalwarp = 'gdalwarp -s_srs %s -t_srs %s %s %s/%s-proj.%s' % (
-        old_projection, new_projection, f, new_path, filename, extension)
-    os.system(gdalwarp)
-
-    return "%s/%s-proj.%s" % (new_path, filename, extension)

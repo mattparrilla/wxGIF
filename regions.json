@@ -1,0 +1,197 @@
+{
+    "northeast": {
+        "name": "Northeast",
+        "corner": "se",
+        "coordinates": [
+            1680,
+            120,
+            2240,
+            600
+        ],
+        "hashtags": [
+            "mewx",
+            "nhwx",
+            "vtwx",
+            "nywx",
+            "mawx",
+            "ctwx",
+            "pawx",
+            "njwx",
+            "skitheeast"
+        ]
+    },
+    "northrockies": {
+        "name": "Northern Rockies",
+        "corner": false,
+        "coordinates": [
+            360,
+            40,
+            920,
+            520
+        ],
+        "hashtags": [
+            "idwx",
+            "mtwx",
+            "wywx"
+        ]
+    },
+    "pacsouthwest": {
+        "name": "Pacific Southwest",
+        "corner": "sw",
+        "coordinates": [
+            90,
+            400,
+            650,
+            920
+        ],
+        "hashtags": [
+            "cawx",
+            "nvwx"
+        ]
+    },
+    "southrockies": {
+        "name": "Southern Rockies",
+        "corner": "sw",
+        "coordinates": [
+            400,
+            400,
+            960,
+            960
+        ],
+        "hashtags": [
+            "utwx",
+            "azwx",
+            "cowx",
+            "nmwx"
+        ]
+    },
+    "uppermissvly": {
+        "name": "Northern Plains",
+        "corner": "nw",
+        "coordinates": [
+            840,
+            40,
+            1400,
+            560
+        ],
+        "hashtags": [
+            "ndwx",
+            "sdwx",
+            "mnwx",
+            "newx",
+            "iawx"
+        ]
+    },
+    "southplains": {
+        "name": "Southern Plains",
+        "corner": false,
+        "coordinates": [
+            880,
+            480,
+            1440,
+            880
+        ],
+        "hashtags": [
+            "kswx",
+            "mowx",
+            "okwx",
+            "arwx"
+        ]
+    },
+    "centgrtlakes": {
+        "name": "Great Lakes",
+        "corner": "ne",
+        "coordinates": [
+            1240,
+            80,
+            1800,
+            720
+        ],
+        "hashtags": [
+            "wiwx",
+            "miwx",
+            "ilwx",
+            "inwx",
+            "ohwx"
+        ]
+    },
+    "deepsouth": {
+        "name": "Deep South",
+        "corner": "nw",
+        "coordinates": [
+            1280,
+            720,
+            1840,
+            1240
+        ],
+        "hashtags": [
+            "flwx",
+            "gawx",
+            "scwx",
+            "alwx",
+            "mswx"
+        ]
+    },
+    "midatlantic": {
+        "name": "Mid-Atlantic",
+        "corner": "se",
+        "coordinates": [
+            1360,
+            480,
+            1920,
+            920
+        ],
+        "hashtags": [
+            "ncwx",
+            "vawx",
+            "tnwx",
+            "kywx",
+            "wvwx",
+            "mdwx",
+            "dewx"
+        ]
+    },
+    "pacnorthwest": {
+        "name": "Pacific Northwest",
+        "corner": "nw",
+        "coordinates": [
+            64,
+            40,
+            624,
+            520
+        ],
+        "hashtags": [
+            "wawx",
+            "orwx",
+            "idwx"
+        ]
+    },
+    "texas": {
+        "name": "Texas and Oklahoma",
+        "corner": "se",
+        "coordinates": [
+            720,
+            640,
+            1280,
+            1200
+        ],
+        "hashtags": [
+            "txwx",
+            "okwx"
+        ]
+    },
+    "gulfcoast": {
+        "name": "Gulf Coast",
+        "corner": false,
+        "coordinates": [
+            1100,
+            820,
+            1660,
+            1220
+        ],
+        "hashtags": [
+            "lawx",
+            "gulfwx"
+        ]
+    }
+}
