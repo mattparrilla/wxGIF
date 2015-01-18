@@ -23,11 +23,11 @@ def radar_to_gif(publish=False, tweet=False):
     with open('regions.json', 'r') as f:
         regions = json.load(f)
 
-    radar = download_images()
+    radar = download_images()[:4]
 
     # mypath and following line used to skip steps when testing new styles
-    #mypath = "gif/new_palette"
-    #new_palette = ["%s/%s" % (mypath, f) for f in listdir(mypath)
+    #mypath = "gif/new_projection"
+    #reprojected = ["%s/%s" % (mypath, f) for f in listdir(mypath)
     #    if isfile(join(mypath, f)) and f != '.DS_Store']
 
     # Transform Radar
@@ -117,4 +117,4 @@ def resize_gif(region, frames, idx):
 
     return thumbnail_f
 
-radar_to_gif(tweet=True)
+radar_to_gif()

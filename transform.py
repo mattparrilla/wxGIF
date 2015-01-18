@@ -171,6 +171,7 @@ def add_basemap(radar, regions='Conus', basemap="basemap/Conus.png"):
     print "Adding basemap to %s" % radar
 
     timestamp = radar.split('/')[-1].split('_')[2]
+    print basemap
     background = add_text(Image.open(basemap), timestamp, regions)
     foreground = Image.open(radar).convert("RGBA")
     combined = "gif/basemap/%s-bm-%s.png" % (
@@ -190,12 +191,12 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
     color = (200, 200, 200)
 
     if regions == 'Conus':
-        x1 = image.size[0] - 63
+        x1 = image.size[0] - 62
         x2 = image.size[0] - 63
-        y1 = image.size[1] - 45
+        y1 = image.size[1] - 42
         y2 = image.size[1] - 25
 
-        font = ImageFont.truetype('fonts/rokkitt.otf', 28)
+        font = ImageFont.truetype('fonts/DroidSansMono.ttf', 16)
         draw.text((x1, y1), timestamp, color, font=font)
 
         label_font = ImageFont.truetype('fonts/raleway.otf', 18)
@@ -206,20 +207,20 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
             # attributes['corner'] uses cardinal directions, i.e. 'ne'
             if attributes['corner']:
                 if 'n' in attributes['corner']:
-                    y1 = attributes['coordinates'][1] + 5
+                    y1 = attributes['coordinates'][1] + 8
                     y2 = attributes['coordinates'][1] + 25
                 elif 's' in attributes['corner']:
-                    y1 = attributes['coordinates'][3] - 45
+                    y1 = attributes['coordinates'][3] - 42
                     y2 = attributes['coordinates'][3] - 25
 
                 if 'w' in attributes['corner']:
-                    x1 = attributes['coordinates'][0] + 10
+                    x1 = attributes['coordinates'][0] + 9
                     x2 = attributes['coordinates'][0] + 10
                 elif 'e' in attributes['corner']:
-                    x1 = attributes['coordinates'][2] - 63
+                    x1 = attributes['coordinates'][2] - 62
                     x2 = attributes['coordinates'][2] - 63
 
-                font = ImageFont.truetype('fonts/rokkitt.otf', 28)
+                font = ImageFont.truetype('fonts/DroidSansMono.ttf', 16)
                 draw.text((x1, y1), timestamp, color, font=font)
 
                 label_font = ImageFont.truetype('fonts/raleway.otf', 18)
