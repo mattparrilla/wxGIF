@@ -6,33 +6,59 @@
             120,
             2240,
             600
+        ],
+        "hashtags": [
+            "mewx",
+            "nhwx",
+            "vtwx",
+            "nywx",
+            "mawx",
+            "ctwx",
+            "pawx",
+            "njwx",
+            "skitheeast"
         ]
     },
-    "northernrockies": {
+    "northrockies": {
         "corner": false,
         "coordinates": [
             360,
             40,
             920,
             520
+        ],
+        "hashtags": [
+            "idwx",
+            "mtwx",
+            "wywx"
         ]
     },
-    "pacificsouthwest": {
+    "pacsouthwest": {
         "corner": "sw",
         "coordinates": [
             40,
             400,
             600,
             920
+        ],
+        "hashtags": [
+            "cawx",
+            "nvwx"
         ]
     },
-    "southernrockies": {
+    "southrockies": {
         "corner": "sw",
         "coordinates": [
             400,
             400,
             960,
             960
+        ],
+        "hashtags": [
+            "utwx",
+            "azwx",
+            "cowx",
+            "nmwx"
         ]
     },
     "uppermissvly": {
@@ -42,24 +68,44 @@
             40,
             1400,
             560
+        ],
+        "hashtags": [
+            "ndwx",
+            "sdwx",
+            "mnwx",
+            "newx",
+            "iawx"
         ]
     },
-    "tornadoalley": {
+    "southplains": {
         "corner": false,
         "coordinates": [
             880,
             480,
             1440,
             880
+        ],
+        "hashtags": [
+            "kswx",
+            "mowx",
+            "okwx",
+            "arwx"
         ]
     },
-    "greatlakes": {
+    "centgreatlakes": {
         "corner": "ne",
         "coordinates": [
             1240,
             80,
             1800,
             720
+        ],
+        "hashtags": [
+            "wiwx",
+            "miwx",
+            "ilwx",
+            "inwx",
+            "ohwx"
         ]
     },
     "deepsouth": {
@@ -69,6 +115,13 @@
             720,
             1840,
             1240
+        ],
+        "hashtags": [
+            "flwx",
+            "gawx",
+            "scwx",
+            "alwx",
+            "mswx"
         ]
     },
     "midatlantic": {
@@ -78,24 +131,55 @@
             480,
             1920,
             920
+        ],
+        "hashtags": [
+            "ncwx",
+            "vawx",
+            "tnwx",
+            "kywx",
+            "wvwx",
+            "mdwx",
+            "dewx"
         ]
     },
-    "pacificnorthwest": {
+    "pacnorthwest": {
         "corner": "nw",
         "coordinates": [
             64,
             40,
             624,
             520
+        ],
+        "hashtags": [
+            "wawx",
+            "orwx",
+            "idwx"
         ]
     },
     "texas": {
-        "corner": "sw",
+        "corner": "se",
         "coordinates": [
             720,
             640,
             1280,
             1200
+        ],
+        "hashtags": [
+            "txwx",
+            "okwx"
+        ]
+    },
+    "gulfcoast": {
+        "corner": false,
+        "coordinates": [
+            1100,
+            820,
+            1660,
+            1220
+        ],
+        "hashtags": [
+            "lawx",
+            "gulfwx"
         ]
     }
 }
