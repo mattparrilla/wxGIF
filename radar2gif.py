@@ -23,7 +23,7 @@ def radar_to_gif(publish=False, tweet=False):
     with open('regions.json', 'r') as f:
         regions = json.load(f)
 
-    radar = download_images()[:4]
+    radar = download_images()
 
     # mypath and following line used to skip steps when testing new styles
     #mypath = "gif/new_projection"
@@ -117,4 +117,4 @@ def resize_gif(region, frames, idx):
 
     return thumbnail_f
 
-radar_to_gif()
+radar_to_gif(tweet=True)

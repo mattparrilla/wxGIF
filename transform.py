@@ -191,7 +191,7 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
     color = (200, 200, 200)
 
     if regions == 'Conus':
-        x1 = image.size[0] - 62
+        x1 = image.size[0] - 63
         x2 = image.size[0] - 63
         y1 = image.size[1] - 42
         y2 = image.size[1] - 25
@@ -217,7 +217,7 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
                     x1 = attributes['coordinates'][0] + 9
                     x2 = attributes['coordinates'][0] + 10
                 elif 'e' in attributes['corner']:
-                    x1 = attributes['coordinates'][2] - 62
+                    x1 = attributes['coordinates'][2] - 63
                     x2 = attributes['coordinates'][2] - 63
 
                 font = ImageFont.truetype('fonts/DroidSansMono.ttf', 16)
