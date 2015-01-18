@@ -1,5 +1,6 @@
 {
     "northeast": {
+        "name": "Northeast",
         "corner": "se",
         "coordinates": [
             1680,
@@ -20,6 +21,7 @@
         ]
     },
     "northrockies": {
+        "name": "Northern Rockies",
         "corner": false,
         "coordinates": [
             360,
@@ -34,11 +36,12 @@
         ]
     },
     "pacsouthwest": {
+        "name": "Pacific Southwest",
         "corner": "sw",
         "coordinates": [
-            40,
+            90,
             400,
-            600,
+            650,
             920
         ],
         "hashtags": [
@@ -47,6 +50,7 @@
         ]
     },
     "southrockies": {
+        "name": "Southern Rockies",
         "corner": "sw",
         "coordinates": [
             400,
@@ -62,6 +66,7 @@
         ]
     },
     "uppermissvly": {
+        "name": "Northern Plains",
         "corner": "nw",
         "coordinates": [
             840,
@@ -78,6 +83,7 @@
         ]
     },
     "southplains": {
+        "name": "Southern Plains",
         "corner": false,
         "coordinates": [
             880,
@@ -92,7 +98,8 @@
             "arwx"
         ]
     },
-    "centgreatlakes": {
+    "centgrtlakes": {
+        "name": "Great Lakes",
         "corner": "ne",
         "coordinates": [
             1240,
@@ -109,6 +116,7 @@
         ]
     },
     "deepsouth": {
+        "name": "Deep South",
         "corner": "nw",
         "coordinates": [
             1280,
@@ -125,6 +133,7 @@
         ]
     },
     "midatlantic": {
+        "name": "Mid-Atlantic",
         "corner": "se",
         "coordinates": [
             1360,
@@ -143,6 +152,7 @@
         ]
     },
     "pacnorthwest": {
+        "name": "Pacific Northwest",
         "corner": "nw",
         "coordinates": [
             64,
@@ -157,6 +167,7 @@
         ]
     },
     "texas": {
+        "name": "Texas and Oklahoma",
         "corner": "se",
         "coordinates": [
             720,
@@ -170,6 +181,7 @@
         ]
     },
     "gulfcoast": {
+        "name": "Gulf Coast",
         "corner": false,
         "coordinates": [
             1100,

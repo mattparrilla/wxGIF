@@ -5,10 +5,12 @@ from transform import change_projection, add_basemap, change_palette
 from image_manipulation import crop, resize, resize_and_save
 from libs.images2gif import writeGif
 from PIL import Image
-from config import SAVE_TO_DIR
+from config import SAVE_TO_DIR, APP_KEY, APP_SECRET, twitter_keys
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, getsize
+from twython import Twython
 import json
+from datetime import datetime
 
 
 def radar_to_gif(publish=False, tweet=False):
@@ -24,8 +26,8 @@ def radar_to_gif(publish=False, tweet=False):
     radar = download_images()
 
     # mypath and following line used to skip steps when testing new styles
-    #mypath = "gif/new_projection"
-    #reprojected = ["%s/%s" % (mypath, f) for f in listdir(mypath)
+    #mypath = "gif/new_palette"
+    #new_palette = ["%s/%s" % (mypath, f) for f in listdir(mypath)
     #    if isfile(join(mypath, f)) and f != '.DS_Store']
 
     # Transform Radar
@@ -45,7 +47,7 @@ def radar_to_gif(publish=False, tweet=False):
         gif = generate_gif(resized, region)
         hashtags = unpack_hashtags(details['hashtags'])
         gifs.append({'gif': gif, 'frames': resized, 'region': region,
-            'hashtags': hashtags})
+            'hashtags': hashtags, 'name': details['name']})
 
     # Special case: continental united states does not need to be cropped
     conus_width = [resize_and_save(image, width=560) for image in new_palette]
@@ -54,13 +56,7 @@ def radar_to_gif(publish=False, tweet=False):
     pil_objects = [Image.open(image) for image in radar_and_conus]
     gif = generate_gif(pil_objects, 'Conus')
     gifs.append({'gif': gif, 'frames': pil_objects, 'region': 'Conus',
-        'hashtags': '#uswx #radar'})
-
-    ## Get time of last radar image
-    #last_radar = radar_and_basemap[-1]
-    #time_of_image = last_radar.split('/')[-1].split('.')[0].split('-')[-1]
-    #radar_datetime = (datetime.strptime(time_of_image, "%H%M") +
-    #    timedelta(days=365))
+        'hashtags': '#uswx #radar', 'name': "Continental US"})
 
     if publish:
         for gif in gifs:
@@ -69,16 +65,6 @@ def radar_to_gif(publish=False, tweet=False):
     if tweet:
         for gif in gifs:
             tweet_gif(gif)
-
-
-#def diff_from_utc(zone):
-#    """Returns diff between UTC and supplied timezone"""
-#
-#    timezone = pytz.timezone(zone)
-#    utc = pytz.utc
-#    now = datetime.now()
-#    delta = utc.localize(now) - timezone.localize(now)
-#    return delta
 
 
 def unpack_hashtags(hashtag_list):
@@ -96,27 +82,28 @@ def generate_gif(images, name, duration=0.125):
 
     gif_name = "%s/%s.gif" % (SAVE_TO_DIR, name)
     gif = writeGif(gif_name, images, duration)
-    return gif
+    return gif_name
 
 
 def tweet_gif(gif, remove_frame=0):
     """Tweets the radar gif, includes region name and last radar image in tweet"""
 
     # If file too large, remove frames
-    while os.path.getsize(gif) > 3000000:
-        print "Resize Necessary: %s" % os.path.getsize(gif)
+    while getsize(gif['gif']) > 3000000:
+        print "Resize necessary for %s: %s" % (gif['region'],
+            getsize(gif['gif']))
         remove_frame += 1
-        gif = resize_gif(gif['region'], gif['frames'], remove_frame)
+        gif['gif'] = resize_gif(gif['region'], gif['frames'], remove_frame)
 
     # Connect to twitter API
     twitter = Twython(APP_KEY, APP_SECRET,
-        twitter_keys[region]['OAUTH_TOKEN'],
-        twitter_keys[region]['OAUTH_TOKEN_SECRET'])
+        twitter_keys[gif['region']]['OAUTH_TOKEN'],
+        twitter_keys[gif['region']]['OAUTH_TOKEN_SECRET'])
 
     # Construct tweet content
-    tweet = "Radar over the %s. %s" % (region_name[region], hashtags[region])
+    tweet = "Radar over the %s. %s" % (gif['name'], gif['hashtags'])
     photo = open(gif['gif'], 'rb')
-    #twitter.update_status_with_media(status=tweet, media=photo)
+    twitter.update_status_with_media(status=tweet, media=photo)
 
     print tweet
     print "Tweet sent at: " + datetime.now().strftime("%H:%M")
