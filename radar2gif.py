@@ -117,4 +117,4 @@ def resize_gif(region, frames, idx):
 
     return thumbnail_f
 
-radar_to_gif()
+radar_to_gif(tweet=True)
