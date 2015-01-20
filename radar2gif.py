@@ -5,7 +5,8 @@ from transform import change_projection, add_basemap, change_palette
 from image_manipulation import crop, resize, resize_and_save
 from libs.images2gif import writeGif
 from PIL import Image
-from config import SAVE_TO_DIR, APP_KEY, APP_SECRET, twitter_keys
+from config import (SAVE_TO_DIR, APP_KEY, APP_SECRET, twitter_keys,
+    ABSOLUTE_PATH)
 from os import listdir
 from os.path import isfile, join, getsize
 from twython import Twython
@@ -20,7 +21,7 @@ def radar_to_gif(publish=False, tweet=False):
     Source imagery: http://radar.weather.gov/GIS.html"""
 
     # Get data about all regions
-    with open('regions.json', 'r') as f:
+    with open('%s/regions.json' % ABSOLUTE_PATH, 'r') as f:
         regions = json.load(f)
 
     radar = download_images()
@@ -51,8 +52,8 @@ def radar_to_gif(publish=False, tweet=False):
 
     # Special case: continental united states does not need to be cropped
     conus_width = [resize_and_save(image, width=560) for image in new_palette]
-    radar_and_conus = [add_basemap(image, basemap="basemap/Conus-sm.png")
-        for image in conus_width]
+    radar_and_conus = [add_basemap(image, basemap="%s/basemap/Conus-sm.png"
+        % ABSOLUTE_PATH) for image in conus_width]
     pil_objects = [Image.open(image) for image in radar_and_conus]
     gif = generate_gif(pil_objects, 'Conus')
     gifs.append({'gif': gif, 'frames': pil_objects, 'region': 'Conus',
@@ -80,7 +81,7 @@ def unpack_hashtags(hashtag_list):
 def generate_gif(images, name, duration=0.125):
     """Creates a gif from a list of PIL images"""
 
-    gif_name = "%s/%s.gif" % (SAVE_TO_DIR, name)
+    gif_name = "%s/%s/%s.gif" % (ABSOLUTE_PATH, SAVE_TO_DIR, name)
     gif = writeGif(gif_name, images, duration)
     return gif_name
 
@@ -112,9 +113,9 @@ def tweet_gif(gif, remove_frame=0):
 def resize_gif(region, frames, idx):
     """Removes frames from the beginning of the GIF"""
 
-    thumbnail_f = '%s/%s.gif' % (SAVE_TO_DIR, region)
+    thumbnail_f = '%s/%s/%s.gif' % (ABSOLUTE_PATH, SAVE_TO_DIR, region)
     writeGif(thumbnail_f, frames[idx:], duration=0.125)
 
     return thumbnail_f
 
-radar_to_gif(tweet=True)
+radar_to_gif(tweet=False)

@@ -3,6 +3,7 @@
 import os
 import json
 from PIL import Image, ImageDraw, ImageFont
+from config import ABSOLUTE_PATH
 
 nws_colors = [(152, 84, 198, 255),
     (248, 0, 253, 255),
@@ -94,7 +95,7 @@ def change_projection(filename, old_projection='EPSG:4269',
 
     path, extension = filename.split('.')
     name = path.split('/')[-1]
-    new_path = 'gif/new_projection'
+    new_path = '%s/gif/new_projection' % ABSOLUTE_PATH
     gdalwarp = 'gdalwarp -s_srs %s -t_srs %s %s %s/%s-proj.%s' % (
         old_projection, new_projection, filename, new_path, name, extension)
     os.system(gdalwarp)
@@ -105,7 +106,7 @@ def change_projection(filename, old_projection='EPSG:4269',
 def change_palette(image, color_scheme='Spectral'):
     """Takes an image file and changes the palette"""
 
-    with open('palettes.json', 'r') as f:
+    with open('%s/palettes.json' % ABSOLUTE_PATH, 'r') as f:
         palettes = json.load(f)
 
     #palette = expand_palette(palettes[color_scheme])
@@ -130,7 +131,7 @@ def change_palette(image, color_scheme='Spectral'):
                 elif index > 0:
                     pixels[i, j] = negatives[index - 14]
 
-    filename = "gif/new_palette/%s.%s" % (name, "png")
+    filename = "%s/gif/new_palette/%s.%s" % (ABSOLUTE_PATH, name, "png")
     im.save(filename, "PNG")
 
     return filename
@@ -165,7 +166,9 @@ def expand_palette(palette):
     return new_palette
 
 
-def add_basemap(radar, regions='Conus', basemap="basemap/Conus.png"):
+def add_basemap(radar, regions='Conus',
+                basemap="%s/basemap/Conus.png" % ABSOLUTE_PATH):
+
     """Add Conus basemap and copy (via `add_text`) underneath radar image"""
 
     print "Adding basemap to %s" % radar
@@ -174,7 +177,7 @@ def add_basemap(radar, regions='Conus', basemap="basemap/Conus.png"):
     print basemap
     background = add_text(Image.open(basemap), timestamp, regions)
     foreground = Image.open(radar).convert("RGBA")
-    combined = "gif/basemap/%s-bm-%s.png" % (
+    combined = "%s/gif/basemap/%s-bm-%s.png" % (ABSOLUTE_PATH,
         basemap.split('/')[-1].split('.')[0], timestamp)
 
     background.paste(foreground, (0, 0), foreground)
@@ -196,10 +199,10 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
         y1 = image.size[1] - 42
         y2 = image.size[1] - 25
 
-        font = ImageFont.truetype('fonts/DroidSansMono.ttf', 16)
+        font = ImageFont.truetype('%s/fonts/DroidSansMono.ttf' % ABSOLUTE_PATH, 16)
         draw.text((x1, y1), timestamp, color, font=font)
 
-        label_font = ImageFont.truetype('fonts/raleway.otf', 18)
+        label_font = ImageFont.truetype('%s/fonts/raleway.otf' % ABSOLUTE_PATH, 18)
         draw.text((x2, y2), copy, color, font=label_font)
 
     else:  # If regional imagery
@@ -220,10 +223,12 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
                     x1 = attributes['coordinates'][2] - 63
                     x2 = attributes['coordinates'][2] - 63
 
-                font = ImageFont.truetype('fonts/DroidSansMono.ttf', 16)
+                font = ImageFont.truetype('%s/fonts/DroidSansMono.ttf'
+                    % ABSOLUTE_PATH, 16)
                 draw.text((x1, y1), timestamp, color, font=font)
 
-                label_font = ImageFont.truetype('fonts/raleway.otf', 18)
+                label_font = ImageFont.truetype('%s/fonts/raleway.otf'
+                    % ABSOLUTE_PATH, 18)
                 draw.text((x2, y2), copy, color, font=label_font)
 
     return image
