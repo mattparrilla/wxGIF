@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python2.7
 
 from bs4 import BeautifulSoup as Soup
-from config import BASE_URL
+from config import BASE_URL, ABSOLUTE_PATH
 import requests
 import shutil
 
@@ -27,7 +27,7 @@ def save_radar(src, world_file):
 
     r = requests.get(src, stream=True)
     if r.status_code == 200:
-        name = "gif/source/%s" % src.split('/')[-1]  # split leaves file.ext
+        name = "%s/gif/source/%s" % (ABSOLUTE_PATH, src.split('/')[-1])  # split leaves file.ext
         gfw = "%s.gfw" % name.split('.')[0]  # same name but ext .gfw
 
         # Save image

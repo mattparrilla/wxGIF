@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/mattparrilla/webapps/wxgif/app/venv/bin/python2.7
 
 from download_radar import download_images
 from transform import change_projection, add_basemap, change_palette
@@ -31,8 +31,10 @@ def radar_to_gif(publish=False, tweet=False):
     #reprojected = ["%s/%s" % (mypath, f) for f in listdir(mypath)
     #    if isfile(join(mypath, f)) and f != '.DS_Store']
 
+    for i in radar:
+        print i
     # Transform Radar
-    reprojected = [change_projection(image) for image in radar]
+    reprojected = [change_projection(image) for image in radar if image is not None]
     new_palette = [change_palette(image) for image in reprojected]
     base_width = [resize_and_save(image) for image in new_palette]
     radar_and_basemap = [add_basemap(image, regions=regions) for image in base_width]
@@ -104,7 +106,7 @@ def tweet_gif(gif, remove_frame=0):
     # Construct tweet content
     tweet = "Radar over the %s. %s" % (gif['name'], gif['hashtags'])
     photo = open(gif['gif'], 'rb')
-    twitter.update_status_with_media(status=tweet, media=photo)
+    #twitter.update_status_with_media(status=tweet, media=photo)
 
     print tweet
     print "Tweet sent at: " + datetime.now().strftime("%H:%M")
@@ -118,4 +120,4 @@ def resize_gif(region, frames, idx):
 
     return thumbnail_f
 
-radar_to_gif(tweet=False)
+radar_to_gif(tweet=True)
