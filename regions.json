@@ -2,6 +2,7 @@
     "northeast": {
         "name": "Northeast",
         "corner": "se",
+        "timezone": "US/Eastern",
         "coordinates": [
             1680,
             120,
@@ -23,6 +24,7 @@
     "northrockies": {
         "name": "Northern Rockies",
         "corner": false,
+        "timezone": "US/Mountain",
         "coordinates": [
             360,
             40,
@@ -38,6 +40,7 @@
     "pacsouthwest": {
         "name": "Pacific Southwest",
         "corner": "sw",
+        "timezone": "US/Pacific",
         "coordinates": [
             90,
             400,
@@ -52,6 +55,7 @@
     "southrockies": {
         "name": "Southern Rockies",
         "corner": "sw",
+        "timezone": "US/Pacific",
         "coordinates": [
             400,
             400,
@@ -68,6 +72,7 @@
     "uppermissvly": {
         "name": "Northern Plains",
         "corner": "nw",
+        "timezone": "US/Central",
         "coordinates": [
             840,
             40,
@@ -85,6 +90,7 @@
     "southplains": {
         "name": "Southern Plains",
         "corner": false,
+        "timezone": "US/Central",
         "coordinates": [
             880,
             480,
@@ -101,6 +107,7 @@
     "centgrtlakes": {
         "name": "Great Lakes",
         "corner": "ne",
+        "timezone": "US/Central",
         "coordinates": [
             1240,
             80,
@@ -118,6 +125,7 @@
     "deepsouth": {
         "name": "Deep South",
         "corner": "nw",
+        "timezone": "US/Eastern",
         "coordinates": [
             1280,
             720,
@@ -135,6 +143,7 @@
     "midatlantic": {
         "name": "Mid-Atlantic",
         "corner": "se",
+        "timezone": "US/Eastern",
         "coordinates": [
             1360,
             480,
@@ -154,6 +163,7 @@
     "pacnorthwest": {
         "name": "Pacific Northwest",
         "corner": "nw",
+        "timezone": "US/Pacific",
         "coordinates": [
             64,
             40,
@@ -169,6 +179,7 @@
     "texas": {
         "name": "Texas and Oklahoma",
         "corner": "se",
+        "timezone": "US/Central",
         "coordinates": [
             720,
             640,
@@ -183,6 +194,7 @@
     "gulfcoast": {
         "name": "Gulf Coast",
         "corner": false,
+        "timezone": "US/Central",
         "coordinates": [
             1100,
             820,
