@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os
-import json
 from PIL import Image, ImageDraw, ImageFont
 from config import ABSOLUTE_PATH
+import os
+import json
+import arrow
 
 nws_colors = [(152, 84, 198, 255),
     (248, 0, 253, 255),
@@ -189,7 +190,6 @@ def add_basemap(radar, regions='Conus',
 def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
     """Adds copy and timestamp for all regions to uncropped basemap"""
 
-    timestamp = timestamp[:-2] + ':' + timestamp [-2:]
     draw = ImageDraw.Draw(image)
     color = (200, 200, 200)
 
@@ -199,14 +199,17 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
         y1 = image.size[1] - 42
         y2 = image.size[1] - 25
 
+        time = convert_to_timezone(timestamp, 'US/Eastern')
+
         font = ImageFont.truetype('%s/fonts/DroidSansMono.ttf' % ABSOLUTE_PATH, 16)
-        draw.text((x1, y1), timestamp, color, font=font)
+        draw.text((x1, y1), time, color, font=font)
 
         label_font = ImageFont.truetype('%s/fonts/raleway.otf' % ABSOLUTE_PATH, 18)
         draw.text((x2, y2), copy, color, font=label_font)
 
     else:  # If regional imagery
         for region, attributes in regions.items():
+            time = convert_to_timezone(timestamp, attributes['timezone'])
             # attributes['corner'] uses cardinal directions, i.e. 'ne'
             if attributes['corner']:
                 if 'n' in attributes['corner']:
@@ -225,10 +228,29 @@ def add_text(image, timestamp, regions='Conus', copy="wxGIF"):
 
                 font = ImageFont.truetype('%s/fonts/DroidSansMono.ttf'
                     % ABSOLUTE_PATH, 16)
-                draw.text((x1, y1), timestamp, color, font=font)
+                draw.text((x1, y1), time, color, font=font)
 
                 label_font = ImageFont.truetype('%s/fonts/raleway.otf'
                     % ABSOLUTE_PATH, 18)
                 draw.text((x2, y2), copy, color, font=label_font)
 
     return image
+
+
+def convert_to_timezone(time, timezone):
+    """Takes a UTC timestamp of HHMM format and converts to specified TZ in
+    format: HH:MM"""
+
+    utc_offset = arrow.now(timezone).utcoffset()
+    delta_t = utc_offset.days * 24 + utc_offset.seconds / 3600
+    hour = int(time[:2]) + delta_t
+
+    # delta_t will be negative, so negative time values possible
+    if hour < 0:
+        hour += 24
+
+    hour = str(hour)
+    minutes = time[2:]
+    timestamp = hour + ":" + minutes
+
+    return timestamp
