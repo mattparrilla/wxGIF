@@ -32,7 +32,7 @@ def radar_to_gif(publish=False, tweet=False):
     #    if isfile(join(mypath, f)) and f != '.DS_Store']
 
     # Transform Radar
-    reprojected = [change_projection(image) for image in radar][:4]
+    reprojected = [change_projection(image) for image in radar]
     new_palette = [change_palette(image) for image in reprojected]
     base_width = [resize_and_save(image) for image in new_palette]
     radar_and_basemap = [add_basemap(image, regions=regions) for image in base_width]
@@ -118,4 +118,4 @@ def resize_gif(region, frames, idx):
 
     return thumbnail_f
 
-radar_to_gif(tweet=False)
+radar_to_gif(tweet=True)
