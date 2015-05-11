@@ -106,7 +106,7 @@ def tweet_gif(gif, remove_frame=0):
     # Construct tweet content
     tweet = "Radar over the %s. %s" % (gif['name'], gif['hashtags'])
     photo = open(gif['gif'], 'rb')
-    #twitter.update_status_with_media(status=tweet, media=photo)
+    twitter.update_status_with_media(status=tweet, media=photo)
 
     print tweet
     print "Tweet sent at: " + datetime.now().strftime("%H:%M")
