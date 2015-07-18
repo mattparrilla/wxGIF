@@ -1,38 +1,29 @@
-#!/home/mattparrilla/webapps/wxgif/app/venv/bin/python2.7
-
 from download_radar import download_images
-from transform import change_projection, add_basemap, change_palette
+from transform.palette import change_palette
+from transform.projection import change_projection
+from transform.basemap import add_basemap
 from image_manipulation import crop, resize, resize_and_save
 from libs.images2gif import writeGif
 from PIL import Image
-from config import (SAVE_TO_DIR, APP_KEY, APP_SECRET, twitter_keys,
-    ABSOLUTE_PATH)
-from os import listdir
-from os.path import isfile, join, getsize
+from config import (SAVE_TO_DIR, APP_KEY, APP_SECRET, twitter_keys)
+from os.path import getsize
 from twython import Twython
 import json
 from datetime import datetime
 
 
-def radar_to_gif(publish=False, tweet=False):
+def radar_to_gif(tweet=False, max_number_of_frames=None):
     """Takes NWS radar imagery, changes palette, projection, adds a basemap
     and saves as a GIF.
     Optionally saves to S3 and publishes to twitter
     Source imagery: http://radar.weather.gov/GIS.html"""
 
     # Get data about all regions
-    with open('%s/regions.json' % ABSOLUTE_PATH, 'r') as f:
+    with open('regions.json', 'r') as f:
         regions = json.load(f)
 
-    radar = download_images()
+    radar = download_images()[:max_number_of_frames]  # default is no max
 
-    # mypath and following line used to skip steps when testing new styles
-    #mypath = "gif/new_projection"
-    #reprojected = ["%s/%s" % (mypath, f) for f in listdir(mypath)
-    #    if isfile(join(mypath, f)) and f != '.DS_Store']
-
-    for i in radar:
-        print i
     # Transform Radar
     reprojected = [change_projection(image) for image in radar if image is not None]
     new_palette = [change_palette(image) for image in reprojected]
@@ -54,16 +45,12 @@ def radar_to_gif(publish=False, tweet=False):
 
     # Special case: continental united states does not need to be cropped
     conus_width = [resize_and_save(image, width=560) for image in new_palette]
-    radar_and_conus = [add_basemap(image, basemap="%s/basemap/Conus-sm.png"
-        % ABSOLUTE_PATH) for image in conus_width]
+    radar_and_conus = [add_basemap(image, basemap="basemap/Conus-sm.png")
+        for image in conus_width]
     pil_objects = [Image.open(image) for image in radar_and_conus]
     gif = generate_gif(pil_objects, 'Conus')
     gifs.append({'gif': gif, 'frames': pil_objects, 'region': 'Conus',
         'hashtags': '#uswx #radar', 'name': "Continental US"})
-
-    if publish:
-        for gif in gifs:
-            publish(gif)
 
     if tweet:
         for gif in gifs:
@@ -83,8 +70,8 @@ def unpack_hashtags(hashtag_list):
 def generate_gif(images, name, duration=0.125):
     """Creates a gif from a list of PIL images"""
 
-    gif_name = "%s/%s/%s.gif" % (ABSOLUTE_PATH, SAVE_TO_DIR, name)
-    gif = writeGif(gif_name, images, duration)
+    gif_name = "%s/%s.gif" % (SAVE_TO_DIR, name)
+    writeGif(gif_name, images, duration)
     return gif_name
 
 
@@ -115,9 +102,7 @@ def tweet_gif(gif, remove_frame=0):
 def resize_gif(region, frames, idx):
     """Removes frames from the beginning of the GIF"""
 
-    thumbnail_f = '%s/%s/%s.gif' % (ABSOLUTE_PATH, SAVE_TO_DIR, region)
+    thumbnail_f = '%s/%s.gif' % (SAVE_TO_DIR, region)
     writeGif(thumbnail_f, frames[idx:], duration=0.125)
 
     return thumbnail_f
-
-radar_to_gif(tweet=True)

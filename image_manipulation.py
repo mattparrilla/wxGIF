@@ -14,7 +14,7 @@ def crop(image_file, coordinates):
 
 
 def resize(image, width=560.0):
-    """Resizes an image to a given width"""
+    """Resizes an image to a given width, preserving ratio"""
 
     original_width = image.size[0]
     original_height = image.size[1]
