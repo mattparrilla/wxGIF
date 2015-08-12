@@ -22,6 +22,7 @@ def change_palette(image, old_palette, new_palette):
     image.putpalette(palette)
     return image
 
-test_image = Image.open('gif/source/Conus_20150112_1408_N0Ronly.gif')
+test_image = Image.open('giphy.gif')
 new_image = change_palette(test_image, NWS_PALETTE, NEW_PALETTE)
+new_image.save('test.gif', 'GIF')
 new_image.show()
