@@ -1,4 +1,4 @@
-#Weather GIFs
+# Weather GIFs
 
 This project generates GIFs of NWS radar images and auto tweets them at regular times for a [network of bots](https://twitter.com/wxGIF/following).
 
@@ -6,15 +6,15 @@ Very much a work in progress. Feel free to pull and contribute or clone and use 
 
 ![Weather GIF, Mid-Atlantic](http://i.imgur.com/75bEfcY.gif)
 
-##Data Source
+## Data Source
 
 http://radar.weather.gov/GIS.html
 
-##Bounding Coordinates
+## Bounding Coordinates
 
 -127.620376,21.652538,-66.517938,50.406626
 
-##License
+## License
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with the License.
 You may obtain a copy of the License in the LICENSE file, or at:
